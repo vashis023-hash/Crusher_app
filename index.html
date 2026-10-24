@@ -8,6 +8,10 @@
 <script src="html2canvas.min.js"></script>
 <script src="xlsx.full.min.js"></script>
 <script src="jszip.min.js"></script>
+<script src="firebase-app-compat.js"></script>
+<script src="firebase-auth-compat.js"></script>
+<script src="firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <style>
 /* Layout: one narrow app column (phone-first), sticky date header, fixed bottom tab bar; report is a fixed "paper" sheet like the plant's WhatsApp poster */
@@ -376,6 +380,10 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
     <div class="card" id="installCard" hidden><h2>Install on this phone</h2><div class="body">
       <p class="small">Adds the app to your home screen. It then opens like a normal app and works without internet.</p>
       <button class="btn primary" id="installBtn">Install app</button></div></div>
+    <div class="card"><h2>Database</h2><div class="body">
+      <p class="small" id="dbStatus">Checking…</p>
+      <button class="btn ghost" id="syncNow">Sync now</button>
+    </div></div>
     <div class="card"><h2>Backup &amp; Excel</h2><div class="body">
       <p class="small">All data is kept <b>only on this phone</b>. Take a backup every week and send the file to yourself on WhatsApp or Google Drive. The same file opens in Excel.</p>
       <div class="btnrow"><button class="btn primary" id="exportXlsx">Export Excel (full tracker) / Backup</button><button class="btn ghost" id="restoreBtn">Restore from backup</button></div>
@@ -406,7 +414,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
         <button type="submit" class="btn primary" id="saveSettings">Save settings</button>
       </div>
     </form>
-    <p class="small" style="text-align:center">App version 17 · 24-Oct-2026</p>
+    <p class="small" style="text-align:center">App version 18 · 24-Oct-2026</p>
     <div class="card"><h2>Delete this day</h2><div class="body">
       <p style="margin:0;font-size:13px;color:var(--muted)">Removes the entry for the date shown at the top. Stock and month totals recalculate.</p>
       <button class="btn danger" id="deleteDay">Delete entry for this date</button>
@@ -875,6 +883,7 @@ function persist(){
 async function saveDay(e){
   e.preventDefault();
   days[selected] = cleanDay(readForm());
+  queue({kind:"day", id:selected});
   if (persist()){ clearDraft(selected); dirty=false; renderAll(false); toast("Saved "+dmy(selected)); try { navigator.vibrate && navigator.vibrate(40); } catch(e){} }
 }
 async function saveSettings(e){
@@ -882,7 +891,8 @@ async function saveSettings(e){
   const o = {};
   for (const f of SET_FIELDS){ const v=$("s_"+f).value.trim(); o[f] = (f==="startDate"||f==="preparedBy") ? v : num(v); }
   if (!o.avg) o.avg = 20;
-  settings = o;
+  o.updatedAt = new Date().toISOString();
+  settings = o; queue({kind:"settings"});
   if (persist()){ renderAll(true); toast("Settings saved"); }
 }
 let delArmed = false, delT;
@@ -891,7 +901,7 @@ async function deleteDay(){
   if (!delArmed){ delArmed=true; $("deleteDay").textContent="Tap again to delete "+dmy(selected); clearTimeout(delT);
     delT=setTimeout(()=>{delArmed=false;$("deleteDay").textContent="Delete entry for this date";},4000); return; }
   delArmed=false; $("deleteDay").textContent="Delete entry for this date";
-  delete days[selected]; if (persist()){ renderAll(false); toast("Deleted "+dmy(selected)); }
+  queue({kind:"del", id:selected}); delete days[selected]; if (persist()){ renderAll(false); toast("Deleted "+dmy(selected)); }
 }
 function lastBackupText(){
   let t=null; try{ t=localStorage.getItem("plantlog-lastBackup"); }catch(e){}
@@ -902,15 +912,123 @@ function lastBackupText(){
 function boot(){
   const st = loadStore();
   if (st && st.days){ settings = {...DEFAULT_SETTINGS, ...st.settings}; days = st.days; }
+  else if (cloudConfigured()) { settings = {...DEFAULT_SETTINGS}; days = {}; persist(); }
   else { settings = {...DEFAULT_SETTINGS, ...SEED.settings}; days = JSON.parse(JSON.stringify(SEED.days)); persist(); }
-  setStatus("Saved on this phone");
+  updateSyncStatus();
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(e){}
   const ids = Object.keys(days).sort();
   if (!days[selected] && ids.length && !loadDraft(selected)) { selected = ids[ids.length-1]; $("date").value = selected; }
   const lb = lastBackupText();
   if (lb.old && ids.length) showBanner(lb.text+" Open <b>Data</b> and tap <b>Backup</b> to keep a safe copy.", true);
   fillSettingsForm(); renderAll(false);
+  startCloud();
 }
+
+/* ---------- cloud database (Firebase Firestore) ---------- */
+const PLANT = "sneh-buildcon", OUTBOX_KEY = "plantlog-outbox";
+let cloud = null, cloudReady = false, cloudErr = null, flushing = false, retryT = null, firstDaysSnap = true, firstSettingsSnap = true;
+function cloudConfigured(){ return !!(window.__CLOUD_ADAPTER__ || (window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.projectId && window.firebase)); }
+function loadOutbox(){ try { return JSON.parse(localStorage.getItem(OUTBOX_KEY) || "[]"); } catch(e){ return []; } }
+function saveOutbox(o){ try { localStorage.setItem(OUTBOX_KEY, JSON.stringify(o)); } catch(e){} }
+function queue(op){
+  if (!cloudConfigured()) return;
+  op.t = Date.now() + Math.random();
+  const o = loadOutbox().filter(x => op.kind === "settings" ? x.kind !== "settings" : (x.kind === "settings" || x.id !== op.id));
+  o.push(op); saveOutbox(o); updateSyncStatus(); setTimeout(flush, 0);
+}
+const pendingIds = () => new Set(loadOutbox().filter(x => x.id).map(x => x.id));
+const pendingSettings = () => loadOutbox().some(x => x.kind === "settings");
+const stripLocal = d => { const o = {...d}; delete o._synced; return o; };
+const withTimeout = (pr, ms) => Promise.race([pr, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
+function updateSyncStatus(){
+  const n = loadOutbox().length, dbLine = $("dbStatus");
+  let text, warn = false;
+  if (!cloudConfigured()) { text = "Saved on this phone only"; warn = true; }
+  else if (cloudErr && !cloudReady) { text = n ? `Offline · ${n} waiting` : "Database not reachable"; warn = true; }
+  else if (!cloudReady) text = "Connecting to database…";
+  else if (cloudErr) { text = `Offline · ${n} waiting`; warn = true; }
+  else text = n ? `Saving ${n}…` : "Synced ✓";
+  setStatus(text, warn);
+  if (dbLine) dbLine.textContent = !cloudConfigured() ? "Not set up yet: data is kept on this phone only." :
+    `Firebase project: ${(window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.projectId) || "test"} · ${text}`;
+}
+async function flush(){
+  if (!cloud || !cloudReady || flushing) return;
+  flushing = true; clearTimeout(retryT);
+  try {
+    let o = loadOutbox();
+    while (o.length) {
+      const op = o[0];
+      if (op.kind === "day") { if (days[op.id]) { await withTimeout(cloud.setDay(op.id, stripLocal(days[op.id])), 15000); days[op.id]._synced = true; } }
+      else if (op.kind === "del") await withTimeout(cloud.delDay(op.id), 15000);
+      else if (op.kind === "settings") await withTimeout(cloud.setSettings(settings), 15000);
+      saveOutbox(loadOutbox().filter(x => x.t !== op.t)); persist();
+      o = loadOutbox();
+    }
+    cloudErr = null;
+  } catch(err) {
+    cloudErr = err; retryT = setTimeout(flush, 20000);
+  } finally { flushing = false; updateSyncStatus(); }
+}
+function onRemoteDays(changes){
+  const pend = pendingIds(); let changed = false;
+  for (const ch of changes) {
+    if (pend.has(ch.id)) continue;
+    if (ch.type === "removed") { if (days[ch.id]) { delete days[ch.id]; changed = true; } continue; }
+    const r = ch.data || {}, l = days[ch.id];
+    if (!l || !l.updatedAt || (r.updatedAt || "") >= l.updatedAt) {
+      if (!l || JSON.stringify(stripLocal(l)) !== JSON.stringify(r)) changed = true;
+      days[ch.id] = {...r, _synced:true};
+    } else queue({kind:"day", id:ch.id});
+  }
+  if (firstDaysSnap) {
+    firstDaysSnap = false;
+    const remote = new Set(changes.filter(c => c.type !== "removed").map(c => c.id));
+    for (const id of Object.keys(days)) {
+      if (remote.has(id) || pend.has(id)) continue;
+      if (days[id]._synced) { delete days[id]; changed = true; }   // deleted from another phone
+      else queue({kind:"day", id});                                 // not uploaded yet
+    }
+  }
+  if (changed) { persist(); renderAll(dirty); }
+  cloudErr = null; updateSyncStatus();
+}
+function onRemoteSettings(r){
+  const first = firstSettingsSnap; firstSettingsSnap = false;
+  if (pendingSettings()) return;
+  if (!r) { if (first && Object.keys(days).length) queue({kind:"settings"}); return; }
+  if (!settings.updatedAt || (r.updatedAt || "") >= settings.updatedAt) {
+    settings = {...DEFAULT_SETTINGS, ...r}; persist(); fillSettingsForm(); renderAll(true);
+  } else queue({kind:"settings"});
+}
+function firebaseAdapter(cfg){
+  let base;
+  return {
+    async start(onDays, onSettings, onErr){
+      if (!firebase.apps.length) firebase.initializeApp(cfg);
+      await firebase.auth().signInAnonymously();
+      const db = firebase.firestore();
+      try { db.settings({ignoreUndefinedProperties:true, merge:true}); } catch(e){}
+      base = db.collection("plants").doc(PLANT);
+      base.collection("days").onSnapshot(snap => onDays(snap.docChanges().map(c => ({type:c.type, id:c.doc.id, data:c.doc.data()}))), onErr);
+      base.collection("meta").doc("settings").onSnapshot(d => onSettings(d.exists ? d.data() : null), onErr);
+    },
+    setDay: (id, d) => base.collection("days").doc(id).set(d),
+    delDay: id => base.collection("days").doc(id).delete(),
+    setSettings: st => base.collection("meta").doc("settings").set(st),
+  };
+}
+async function startCloud(){
+  if (window.__CLOUD_ADAPTER__) cloud = window.__CLOUD_ADAPTER__;
+  else if (cloudConfigured()) cloud = cloud || firebaseAdapter(window.FIREBASE_CONFIG);
+  else { cloud = null; updateSyncStatus(); return; }
+  updateSyncStatus();
+  try {
+    await cloud.start(onRemoteDays, onRemoteSettings, err => { cloudErr = err; updateSyncStatus(); });
+    cloudReady = true; cloudErr = null; updateSyncStatus(); flush();
+  } catch(err) { cloudErr = err; updateSyncStatus(); setTimeout(startCloud, 30000); }
+}
+window.addEventListener("online", () => { cloudErr = null; flush(); });
 
 /* ---------- exports ---------- */
 function downloadBlob(blob, name){
@@ -1105,7 +1223,12 @@ async function readBackup(file){
 }
 function applyRestore(){
   if (!pendingRestore) return;
-  days = pendingRestore.days; if (pendingRestore.settings) settings = pendingRestore.settings;
+  const before = Object.keys(days);
+  days = pendingRestore.days; if (pendingRestore.settings) settings = {...pendingRestore.settings, updatedAt:new Date().toISOString()};
+  const stamp = new Date().toISOString();
+  for (const id of Object.keys(days)) { days[id].updatedAt = stamp; delete days[id]._synced; queue({kind:"day", id}); }
+  for (const id of before) if (!days[id]) queue({kind:"del", id});
+  queue({kind:"settings"});
   pendingRestore = null; $("restoreApply").hidden = true;
   if (persist()){ const ids=Object.keys(days).sort(); fillSettingsForm(); setDate(ids[ids.length-1]); toast("Backup restored"); }
 }
@@ -1185,6 +1308,7 @@ $("exportXlsx").addEventListener("click", exportXlsx);
 $("restoreBtn").addEventListener("click", () => $("restoreFile").click());
 $("restoreFile").addEventListener("change", e => { const f=e.target.files[0]; if (f) readBackup(f); e.target.value=""; });
 $("restoreApply").addEventListener("click", applyRestore);
+$("syncNow").addEventListener("click", () => { if (!cloudConfigured()) { toast("The database is not set up yet."); return; } cloudErr = null; if (!cloudReady) startCloud(); else flush(); toast("Syncing…"); });
 $("sheetClose").addEventListener("click", closeSheet);
 function viewFull(){
   if (!imgCache || imgCache.id !== selected) { toast("Preparing image… try again in a second."); prepareImage(); return; }
