@@ -309,18 +309,8 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
         </div>
       </div>
 
-      <div class="card c5">
-        <h2><span class="num">5</span>Remarks</h2>
-        <div class="body">
-          <div class="field"><label for="rPrimary">Primary section</label><textarea id="rPrimary" rows="2" placeholder="Type, or tap a phrase below"></textarea></div>
-          <div class="chips"><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was running well during both shifts as boulder was available.">+ Running well</button><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was running low due to boulder not available from mine&#x27;s.">+ Boulder not available</button><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was running from stock boulder only because boulder was not available from the mines.">+ From stock only</button><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was not running due to breakdown / maintenance work.">+ Breakdown / maintenance</button></div>
-          <div class="field"><label for="rSecondary">Secondary section</label><textarea id="rSecondary" rows="2" placeholder="Type, or tap a phrase below"></textarea></div>
-          <div class="chips"><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was running well during both shifts.">+ Running well</button><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was running low due to no material in the tunnel feeder.">+ No material in tunnel</button><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was not running properly due to power cut.">+ Power cut</button><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was not running due to maintenance work.">+ Maintenance</button></div>
-        </div>
-      </div>
-
       <div class="card c6">
-        <h2><span class="num">6</span>Fuel (diesel) received today</h2>
+        <h2><span class="num">5</span>Fuel (diesel) received today</h2>
         <div class="body">
           <div class="grid3">
             <div class="field"><label for="dCamper">Camper MP07ZM6345</label><div class="inp"><input id="dCamper" inputmode="decimal" placeholder="0"><span class="u">Ltr</span></div></div>
@@ -328,6 +318,16 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
             <div class="field"><label for="dExc">Hyundai Exc. R230</label><div class="inp"><input id="dExc" inputmode="decimal" placeholder="0"><span class="u">Ltr</span></div></div>
           </div>
           <div class="calc" id="calc6"></div>
+        </div>
+      </div>
+
+      <div class="card c5">
+        <h2><span class="num">6</span>Remarks</h2>
+        <div class="body">
+          <div class="field"><label for="rPrimary">Primary section</label><textarea id="rPrimary" rows="2" placeholder="Type, or tap a phrase below"></textarea></div>
+          <div class="chips"><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was running well during both shifts as boulder was available.">+ Running well</button><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was running low due to boulder not available from mine&#x27;s.">+ Boulder not available</button><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was running from stock boulder only because boulder was not available from the mines.">+ From stock only</button><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was not running due to breakdown / maintenance work.">+ Breakdown / maintenance</button></div>
+          <div class="field"><label for="rSecondary">Secondary section</label><textarea id="rSecondary" rows="2" placeholder="Type, or tap a phrase below"></textarea></div>
+          <div class="chips"><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was running well during both shifts.">+ Running well</button><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was running low due to no material in the tunnel feeder.">+ No material in tunnel</button><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was not running properly due to power cut.">+ Power cut</button><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was not running due to maintenance work.">+ Maintenance</button></div>
         </div>
       </div>
 
@@ -366,7 +366,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
     <div class="card chartcard c2"><h2><span class="num">2</span>Dispatch by material</h2><div class="body"><div class="chartbox"><canvas id="chDisp"></canvas></div></div></div>
     <div class="card chartcard c3"><h2><span class="num">3</span>This month's dispatch mix</h2><div class="body"><div class="chartbox"><canvas id="chMix"></canvas></div></div></div>
     <div class="card chartcard c4"><h2><span class="num">4</span>Running hours</h2><div class="body"><div class="chartbox"><canvas id="chHours"></canvas></div></div></div>
-    <div class="card chartcard c6"><h2><span class="num">6</span>Diesel received</h2><div class="body"><div class="chartbox"><canvas id="chDiesel"></canvas></div></div></div>
+    <div class="card chartcard c6"><h2><span class="num">5</span>Diesel received</h2><div class="body"><div class="chartbox"><canvas id="chDiesel"></canvas></div></div></div>
   </section>
 
   <!-- DATA & SETTINGS -->
@@ -404,7 +404,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
         <button type="submit" class="btn primary" id="saveSettings">Save settings</button>
       </div>
     </form>
-    <p class="small" style="text-align:center">App version 14 · 24-Oct-2026</p>
+    <p class="small" style="text-align:center">App version 15 · 24-Oct-2026</p>
     <div class="card"><h2>Delete this day</h2><div class="body">
       <p style="margin:0;font-size:13px;color:var(--muted)">Removes the entry for the date shown at the top. Stock and month totals recalculate.</p>
       <button class="btn danger" id="deleteDay">Delete entry for this date</button>
@@ -670,14 +670,14 @@ function reportHTML(id){
     ${tr("Total aggregate", f3(c.mAgg), c.mAggT)}
     ${tr("Total M-Sand", f3(c.mMs), c.mMsT)}
     ${tr("All material", f3(c.mAll), c.mAllT, "tot")}</table></div>`;
-  const b6 = `<div class="sec k6">${H("fuel","6. Fuel (diesel)","#0E7F7E")}<table>
+  const b6 = `<div class="sec k6">${H("fuel","5. Fuel (diesel)","#0E7F7E")}<table>
     <tr><th>Received today</th><th>Litres</th></tr>
     ${tr("Camper MP07ZM6345", c.dCamper ? fmtInt(c.dCamper) : "NIL")}
     ${tr("JCB UP92T7813", c.dJcb ? fmtInt(c.dJcb) : "NIL")}
     ${tr("Hyundai Excavator R230", c.dExc ? fmtInt(c.dExc) : "NIL")}
     ${tr("Total today", c.dsl ? fmtInt(c.dsl) + " Ltr" : "NIL", undefined, "tot")}
     ${tr("Total this month", fmtInt(c.mDsl) + " Litres", undefined, "tot")}</table></div>`;
-  const b5 = `<div class="sec k5" style="margin-top:10px">${H("clip","5. Remarks","#6B3FA0")}<div class="rmk">
+  const b5 = `<div class="sec k5" style="margin-top:10px">${H("clip","6. Remarks","#6B3FA0")}<div class="rmk">
     <div><b>Primary section</b>${esc(c.rPrimary)||"–"}</div><div><b>Secondary section</b>${esc(c.rSecondary)||"–"}</div></div></div>`;
   const foot = settings.preparedBy ? `<div class="foot">Prepared by: <b>${esc(settings.preparedBy)}</b></div>` : "";
   return head + b1 + `<div class="cols"><div class="col">${b2}${b3}</div><div class="col">${b4}${b6}</div></div>` + b5 + foot;
@@ -694,8 +694,8 @@ function whatsappText(id){
     `Total aggregate: ${nil3(c.agg)} MT (${nil2(c.aggT)})`, `Total all material: ${nil3(c.all)} MT (${nil2(c.allT)})`, ``);
   L.push(`*3. This month*`, `Aggregate: ${f3(c.mAgg)} MT (${c.mAggT})`, `M-Sand: ${f3(c.mMs)} MT (${c.mMsT})`, `All material: ${f3(c.mAll)} MT (${c.mAllT})`, ``);
   L.push(`*4. Plant and equipment's running hours/km*`, `Primary ${f1(c.hPrimary)} hrs · Secondary ${f1(c.hSecondary)} hrs · Hyundai R230 ${f1(c.hExc)} hrs · JCB ${f1(c.hJcb)} hrs · Camper ${km(c.hCamper)} km`, ``);
-  if (c.rPrimary || c.rSecondary) L.push(`*5. Remarks*`, c.rPrimary?`Primary: ${c.rPrimary}`:"", c.rSecondary?`Secondary: ${c.rSecondary}`:"", ``);
-  L.push(`*6. Diesel*`, `Today: ${c.dsl?fmtInt(c.dsl)+" Ltr":"NIL"}`, `This month: ${fmtInt(c.mDsl)} Litres`);
+  L.push(`*5. Diesel*`, `Today: ${c.dsl?fmtInt(c.dsl)+" Ltr":"NIL"}`, `This month: ${fmtInt(c.mDsl)} Litres`);
+  if (c.rPrimary || c.rSecondary) L.push(``, `*6. Remarks*`, c.rPrimary?`Primary: ${c.rPrimary}`:"", c.rSecondary?`Secondary: ${c.rSecondary}`:"");
   if (settings.preparedBy) L.push(``, `Prepared by: ${settings.preparedBy}`);
   return L.filter((x,i,a)=>!(x===""&&a[i-1]==="")).join("\n");
 }
