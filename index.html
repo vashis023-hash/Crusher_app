@@ -144,7 +144,7 @@ nav.tabs button[aria-selected=true] svg{color:var(--accent)}
 .paperwrap{overflow:hidden;border-radius:var(--radius);border:1px solid var(--line);background:#fff;position:relative}
 .paperwrap .paper{transform-origin:top left;position:absolute;left:0;top:0}
 .capture{position:fixed;left:-10000px;top:0}
-.paper{--navy:#14306B;--ink:#101418;--muted:#5A6472;--line:#D9DEE6;--zebra:#F5F7FA;--frame:#1E5AA8;
+.paper{--navy:#14306B;--ink:#0B0F14;--muted:#2F3A4A;--line:#D9DEE6;--zebra:#F5F7FA;--frame:#1E5AA8;
   position:relative;width:720px;background:#fff;color:var(--ink);padding:16px 16px 12px;font-family:Roboto,"Segoe UI",Arial,sans-serif;
   font-size:15px;line-height:1.25;border:5px solid var(--frame);border-radius:16px;overflow:hidden;font-variant-numeric:tabular-nums}
 .paper .corner{position:absolute;width:0;height:0;top:0}
@@ -176,23 +176,24 @@ nav.tabs button[aria-selected=true] svg{color:var(--accent)}
 .paper .split table + table{border-left:2px solid var(--line)}
 .paper .col{display:grid;gap:10px}
 .paper .sec{border:2px solid var(--bc);border-radius:12px;overflow:hidden;background:#fff}
-.paper .sec h3{margin:0;display:flex;align-items:center;gap:8px;background:var(--bc);color:#fff;font-family:var(--display);font-weight:800;font-size:17px;padding:5px 10px 5px 5px;text-transform:uppercase;letter-spacing:.02em;line-height:1.1}
+.paper .sec h3{margin:0;display:flex;align-items:center;gap:8px;background:var(--bc);color:#fff;font-family:var(--display);font-weight:800;font-size:17.5px;padding:5px 10px 5px 5px;text-transform:uppercase;letter-spacing:.02em;line-height:1.1}
 .paper .sec h3 .ic{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#fff;flex:0 0 auto}
 .paper table{width:100%;border-collapse:collapse}
-.paper th{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;text-align:right;padding:5px 8px 3px}
+.paper th{font-size:12px;font-weight:800;color:#3A4659;text-transform:uppercase;letter-spacing:.04em;text-align:right;padding:5px 8px 3px}
 .paper th:first-child{text-align:left}
-.paper td{padding:5px 8px;border-top:1px solid var(--line);font-size:14.5px}
+.paper td{padding:5px 8px;border-top:1px solid var(--line);font-size:15px;font-weight:600;color:var(--ink)}
 .paper tr:nth-child(even) td{background:var(--zebra)}
-.paper td.n{text-align:right;font-weight:800;font-size:16px;white-space:nowrap}
-.paper td.t{text-align:right;font-weight:700;color:var(--muted);white-space:nowrap;width:46px}
+.paper td.n{text-align:right;font-weight:800;font-size:16.5px;white-space:nowrap}
+.paper td.n small{font-size:12.5px;font-weight:700;color:#3A4659}
+.paper td.t{text-align:right;font-weight:800;color:#2F3A4A;white-space:nowrap;width:46px}
 .paper tr.tot td{background:var(--bt)!important;font-weight:800}
 .paper tr.tot td.n{font-size:17.5px;color:var(--bc)}
 .paper tr.tot td.t{color:var(--ink)}
-.paper tr.sub td{font-size:13.5px;color:#2A3340}
+.paper tr.sub td{font-size:14px;color:var(--ink)}
 .paper tr.sub td.n{font-size:15px}
-.paper .note{font-size:11.5px;color:var(--muted);padding:5px 8px;border-top:1px solid var(--line);line-height:1.3}
+.paper .note{font-size:12.5px;font-weight:600;color:#2F3A4A;padding:6px 8px;border-top:1px solid var(--line);line-height:1.4}
 .paper .rmk{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:8px}
-.paper .rmk div{background:#F8F5FC;border:1px solid #DDD3EC;border-radius:10px;padding:7px 9px;font-size:14px;line-height:1.3}
+.paper .rmk div{background:#F8F5FC;border:1px solid #DDD3EC;border-radius:10px;padding:7px 9px;font-size:14.5px;font-weight:500;color:var(--ink);line-height:1.35}
 .paper .rmk b{display:block;font-size:13px;color:#6B3FA0;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
 .paper .foot{display:flex;justify-content:flex-end;align-items:baseline;gap:8px;margin-top:8px;color:var(--navy);font-weight:700;font-size:13px}
 .paper .foot b{font-family:var(--display);font-size:20px}
@@ -404,7 +405,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
         <button type="submit" class="btn primary" id="saveSettings">Save settings</button>
       </div>
     </form>
-    <p class="small" style="text-align:center">App version 15 · 24-Oct-2026</p>
+    <p class="small" style="text-align:center">App version 16 · 24-Oct-2026</p>
     <div class="card"><h2>Delete this day</h2><div class="body">
       <p style="margin:0;font-size:13px;color:var(--muted)">Removes the entry for the date shown at the top. Stock and month totals recalculate.</p>
       <button class="btn danger" id="deleteDay">Delete entry for this date</button>
@@ -652,14 +653,14 @@ function reportHTML(id){
     ${tr("Stock up to date", "≈ " + f3(c.close), "", "tot")}
     ${tr("Received this month", f3(c.mRecv), c.mRecvT, "sub")}
     ${tr("Cumulative up to date", f3(c.cum), c.cumT, "sub")}</table></div>
-    <div class="note">Note: • Boulder crushing from stock is based on an average of ${Math.round(c.noteS)} MT per vehicle. &nbsp; • Boulder received at crusher stock is based on today's average of ${Math.round(c.noteR).toFixed(1)} MT per vehicle.</div></div>`;
+    <div class="note">Note: • Boulder crushing from stock is based on an average of ${Math.round(c.noteS)} MT per vehicle.<br><span style="padding-left:38px">• Boulder received at crusher stock is based on today's average of ${Math.round(c.noteR).toFixed(1)} MT per vehicle.</span></div></div>`;
   const b4 = `<div class="sec k4">${H("clock","4. Plant and equipment's running hours/km","#D9701A")}<table>
     <tr><th>Section / Equipment</th><th>Hours / KM</th></tr>
-    ${tr("Primary Section", f1(c.hPrimary) + " Hrs approx.")}
-    ${tr("Secondary Section", f1(c.hSecondary) + " Hrs.")}
-    ${tr("Hyundai Excavator R230", f1(c.hExc) + " Hrs.")}
-    ${tr("JCB UP92T7813", f1(c.hJcb) + " Hrs.")}
-    ${tr("Camper MP07ZM6345", km(c.hCamper) + " km")}</table></div>`;
+    ${tr("Primary Section", f1(c.hPrimary) + " <small>Hrs approx.</small>")}
+    ${tr("Secondary Section", f1(c.hSecondary) + " <small>Hrs.</small>")}
+    ${tr("Hyundai Excavator R230", f1(c.hExc) + " <small>Hrs.</small>")}
+    ${tr("JCB UP92T7813", f1(c.hJcb) + " <small>Hrs.</small>")}
+    ${tr("Camper MP07ZM6345", km(c.hCamper) + " <small>km</small>")}</table></div>`;
   const b2 = `<div class="sec k2">${H("truck","2. Today's dispatch","#C4261D")}<table>
     <tr><th>Material</th><th>MT</th><th>Trips</th></tr>
     ${MATERIALS.map(([m,t,l]) => tr(l.replace(" Aggregate",""), nil3(c[m]), nil2(c[t]))).join("")}
@@ -675,8 +676,8 @@ function reportHTML(id){
     ${tr("Camper MP07ZM6345", c.dCamper ? fmtInt(c.dCamper) : "NIL")}
     ${tr("JCB UP92T7813", c.dJcb ? fmtInt(c.dJcb) : "NIL")}
     ${tr("Hyundai Excavator R230", c.dExc ? fmtInt(c.dExc) : "NIL")}
-    ${tr("Total today", c.dsl ? fmtInt(c.dsl) + " Ltr" : "NIL", undefined, "tot")}
-    ${tr("Total this month", fmtInt(c.mDsl) + " Litres", undefined, "tot")}</table></div>`;
+    ${tr("Total today", c.dsl ? fmtInt(c.dsl) + " <small>Ltr</small>" : "NIL", undefined, "tot")}
+    ${tr("Total this month", fmtInt(c.mDsl) + " <small>Litres</small>", undefined, "tot")}</table></div>`;
   const b5 = `<div class="sec k5" style="margin-top:10px">${H("clip","6. Remarks","#6B3FA0")}<div class="rmk">
     <div><b>Primary section</b>${esc(c.rPrimary)||"–"}</div><div><b>Secondary section</b>${esc(c.rSecondary)||"–"}</div></div></div>`;
   const foot = settings.preparedBy ? `<div class="foot">Prepared by: <b>${esc(settings.preparedBy)}</b></div>` : "";
