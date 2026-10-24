@@ -144,50 +144,59 @@ nav.tabs button[aria-selected=true] svg{color:var(--accent)}
 .paperwrap{overflow:hidden;border-radius:var(--radius);border:1px solid var(--line);background:#fff;position:relative}
 .paperwrap .paper{transform-origin:top left;position:absolute;left:0;top:0}
 .capture{position:fixed;left:-10000px;top:0}
-.paper{--navy:#17306E;--p-ink:#111;--p-line:#C5CCD8;--frame:#1E5AA8;
-  position:relative;width:900px;background:#fff;color:var(--p-ink);padding:18px 18px 14px;font-family:var(--body);font-size:14.5px;line-height:1.3;
-  border:6px solid var(--frame);border-radius:16px;overflow:hidden}
+.paper{--navy:#14306B;--ink:#101418;--muted:#5A6472;--line:#D9DEE6;--zebra:#F5F7FA;--frame:#1E5AA8;
+  position:relative;width:720px;background:#fff;color:var(--ink);padding:16px 16px 12px;font-family:Roboto,"Segoe UI",Arial,sans-serif;
+  font-size:15px;line-height:1.25;border:5px solid var(--frame);border-radius:16px;overflow:hidden;font-variant-numeric:tabular-nums}
 .paper .corner{position:absolute;width:0;height:0;top:0}
-.paper .corner.l{left:0;border-top:46px solid #F2B705;border-right:46px solid transparent}
-.paper .corner.r{right:0;border-top:46px solid #3E8EDE;border-left:46px solid transparent}
-.paper .ph{display:grid;grid-template-columns:160px 1fr 160px;gap:8px;align-items:center;margin-bottom:6px}
-.paper .ph2{display:grid;gap:5px;justify-items:center;text-align:center;margin-bottom:12px}
-.paper .ph .txt{display:grid;gap:5px;justify-items:center;text-align:center}
-.paper .ph .co{font-family:var(--display);font-weight:800;font-size:40px;white-space:nowrap;color:var(--navy);letter-spacing:.01em;line-height:1}
-.paper .ph .dt{display:flex;align-items:center;gap:10px;background:linear-gradient(#EAF2FF,#D6E6FF);border:2px solid var(--frame);border-radius:99px;padding:3px 22px 3px 4px;font-family:var(--display);font-weight:800;font-size:28px;color:var(--navy)}
-.paper .ph .dt .cal{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#D7263D}
-.paper .ph .dt span{color:#D99A00}
-.paper .ph2 .tt{font-family:var(--display);font-weight:800;font-size:24px;white-space:nowrap;color:var(--navy);line-height:1.05}
-.paper .ph2 .tg{font-weight:700;font-size:13px;color:#1F2A44;letter-spacing:.05em;border-top:2px solid var(--frame);padding-top:4px}
-.paper .ph2 .tg i{display:inline-block;width:3px;height:13px;background:#D7263D;margin:0 10px;vertical-align:-2px}
-.paper .ph .logo{width:160px;height:111px;object-fit:contain}
-.paper .cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
-.paper .cols.top{grid-template-columns:1.06fr .94fr}
-.paper .k1 th:first-child{width:50%}
-.paper .blk{border:2.5px solid var(--bc);border-radius:14px;overflow:hidden;background:#fff}
-.paper .blk h3{margin:0;display:flex;align-items:center;gap:10px;background:var(--bc);color:#fff;font-family:var(--display);font-weight:800;font-size:20px;padding:5px 12px 5px 6px;white-space:nowrap;letter-spacing:.02em;text-transform:uppercase}
-.paper .k4 h3{white-space:normal;font-size:18px;line-height:1.1}
-.paper .blk h3 .ic{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#fff;flex:0 0 auto}
+.paper .corner.l{left:0;border-top:34px solid #F2B705;border-right:34px solid transparent}
+.paper .corner.r{right:0;border-top:34px solid #3E8EDE;border-left:34px solid transparent}
+.paper .ph{display:grid;grid-template-columns:104px 1fr 104px;align-items:center;gap:6px}
+.paper .ph .logo{width:104px;height:72px;object-fit:contain}
+.paper .ph .txt{display:grid;justify-items:center;text-align:center;gap:6px}
+.paper .ph .co{font-family:var(--display);font-weight:800;font-size:32px;color:var(--navy);line-height:1;white-space:nowrap}
+.paper .ph .dt{display:flex;align-items:center;gap:8px;background:#EAF2FF;border:2px solid var(--frame);border-radius:99px;padding:2px 16px 2px 3px;font-family:var(--display);font-weight:800;font-size:24px;color:var(--navy);white-space:nowrap}
+.paper .ph .dt .cal{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#D7263D}
+.paper .ph .dt span.d{color:#C98A00}
+.paper .ph .dt span.w{font-size:16px;color:var(--muted);font-weight:700}
+.paper .ph2{text-align:center;margin:6px 0 10px;display:grid;gap:3px}
+.paper .ph2 .tt{font-family:var(--display);font-weight:800;font-size:19px;color:var(--navy);letter-spacing:.02em}
+.paper .ph2 .tg{font-weight:700;font-size:11px;color:#3A4558;letter-spacing:.06em}
+.paper .ph2 .tg i{display:inline-block;width:3px;height:11px;background:#D7263D;margin:0 8px;vertical-align:-1px}
+/* headline strip */
+.paper .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.paper .kp{border-radius:12px;padding:8px 10px 9px;color:#fff;display:grid;gap:2px;align-content:start}
+.paper .kp span{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;opacity:.92}
+.paper .kp b{font-family:var(--display);font-size:27px;font-weight:800;line-height:1.05;white-space:nowrap}
+.paper .kp b small{font-size:14px;font-weight:700;margin-left:3px}
+.paper .kp i{font-style:normal;font-size:13px;font-weight:700;opacity:.92}
+.paper .kp.g{background:#1E7A3F}.paper .kp.r{background:#C4261D}.paper .kp.d{background:#3B4A5E}.paper .kp.b{background:#2457A5}
+/* sections */
+.paper .cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+.paper .col{display:grid;gap:10px}
+.paper .sec{border:2px solid var(--bc);border-radius:12px;overflow:hidden;background:#fff}
+.paper .sec h3{margin:0;display:flex;align-items:center;gap:8px;background:var(--bc);color:#fff;font-family:var(--display);font-weight:800;font-size:17px;padding:5px 10px 5px 5px;text-transform:uppercase;letter-spacing:.02em;line-height:1.1}
+.paper .sec h3 .ic{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#fff;flex:0 0 auto}
 .paper table{width:100%;border-collapse:collapse}
-.paper th{background:var(--bt);font-weight:700;padding:5px 8px;border:1px solid var(--p-line);font-size:14px}
-.paper td{padding:5px 8px;border:1px solid var(--p-line)}
-.paper td.n{text-align:center;font-weight:700;white-space:nowrap}
-.paper td.b{font-size:17px}
-.paper tr.tot td{font-weight:800;background:var(--bt)}
-.paper tr.hot td{background:#C4261D;color:#fff;font-weight:800}
-.paper .note{font-size:11.5px;font-style:italic;padding:4px 8px;color:#333;background:#F4F8FC}
-.paper .rm{margin:8px;padding:8px 10px;border:1px solid #D8CCEA;border-radius:10px;background:#F8F5FC}
-.paper .rm b{display:block;font-size:17px;margin-bottom:2px}
-.paper .prep{text-align:right;margin-top:10px;font-weight:700;color:var(--navy)}
-.paper .prep span{font-family:var(--display);font-size:24px;display:block}
-.paper .k1{--bc:#1E7A3F;--bt:#E3F1E6}.paper .k2{--bc:#C4261D;--bt:#FCE3E1}.paper .k3{--bc:#2457A5;--bt:#E1EBF8}
-.paper .k4{--bc:#E07A1F;--bt:#FCEBDC}.paper .k5{--bc:#6B3FA0;--bt:#ECE5F5}.paper .k6{--bc:#0E8584;--bt:#DDF2F1}
-.paper .mt{margin-top:12px}
-.paper .fuel{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:10px;padding:10px;align-items:stretch}
-.paper .fuel .box{border:1px solid #BFE3E1;border-radius:10px;background:#F2FAF9;display:grid;align-content:center;justify-items:center;text-align:center;padding:8px;gap:4px}
-.paper .fuel .box .l{font-weight:700;font-size:14px}
-.paper .fuel .box .v{display:flex;align-items:center;gap:8px;font-family:var(--display);font-weight:800;font-size:38px;color:var(--navy);line-height:1}
-.paper .fuel table{border-radius:10px;overflow:hidden}
+.paper th{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;text-align:right;padding:5px 8px 3px}
+.paper th:first-child{text-align:left}
+.paper td{padding:5px 8px;border-top:1px solid var(--line);font-size:14.5px}
+.paper tr:nth-child(even) td{background:var(--zebra)}
+.paper td.n{text-align:right;font-weight:800;font-size:16px;white-space:nowrap}
+.paper td.t{text-align:right;font-weight:700;color:var(--muted);white-space:nowrap;width:46px}
+.paper tr.tot td{background:var(--bt)!important;font-weight:800}
+.paper tr.tot td.n{font-size:17.5px;color:var(--bc)}
+.paper tr.tot td.t{color:var(--ink)}
+.paper tr.sub td{font-size:13.5px;color:#2A3340}
+.paper tr.sub td.n{font-size:15px}
+.paper .note{font-size:11.5px;color:var(--muted);padding:5px 8px;border-top:1px solid var(--line);line-height:1.3}
+.paper .rmk{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:8px}
+.paper .rmk div{background:#F8F5FC;border:1px solid #DDD3EC;border-radius:10px;padding:7px 9px;font-size:14px;line-height:1.3}
+.paper .rmk b{display:block;font-size:13px;color:#6B3FA0;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.paper .foot{display:flex;justify-content:flex-end;align-items:baseline;gap:8px;margin-top:8px;color:var(--navy);font-weight:700;font-size:13px}
+.paper .foot b{font-family:var(--display);font-size:20px}
+.paper .k1{--bc:#1E7A3F;--bt:#E1F1E6}.paper .k2{--bc:#C4261D;--bt:#FCE3E1}.paper .k3{--bc:#2457A5;--bt:#E1EBF8}
+.paper .k4{--bc:#D9701A;--bt:#FCEBDC}.paper .k5{--bc:#6B3FA0;--bt:#ECE5F5}.paper .k6{--bc:#0E7F7E;--bt:#DDF2F1}
+.paper .noentry{padding:40px 16px;text-align:center;color:#555;font-size:18px}
 .paper .noentry{padding:40px 16px;text-align:center;color:#555}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .opt{border:1px dashed var(--line);border-radius:var(--radius);padding:0 12px;background:var(--surface-2)}
@@ -330,7 +339,8 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
       <button class="btn primary" id="saveImg">Share image (WhatsApp)</button>
       <button class="btn ghost" id="copyText">Copy for WhatsApp</button>
     </div>
-    <div class="paperwrap"><div class="paper" id="paper"></div></div>
+    <div class="paperwrap" id="paperwrap" title="Tap to view full size"><div class="paper" id="paper"></div></div>
+    <button class="btn ghost" id="viewFull">View full size (pinch to zoom)</button>
     <p class="hint" style="margin:0;color:var(--muted);font-size:13px">"Share image" opens your phone's share menu so you can pick WhatsApp. "Copy for WhatsApp" copies the same report as text.</p>
   </section>
 
@@ -392,7 +402,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
         <button type="submit" class="btn primary" id="saveSettings">Save settings</button>
       </div>
     </form>
-    <p class="small" style="text-align:center">App version 12 · 24-Oct-2026</p>
+    <p class="small" style="text-align:center">App version 13 · 24-Oct-2026</p>
     <div class="card"><h2>Delete this day</h2><div class="body">
       <p style="margin:0;font-size:13px;color:var(--muted)">Removes the entry for the date shown at the top. Stock and month totals recalculate.</p>
       <button class="btn danger" id="deleteDay">Delete entry for this date</button>
@@ -619,55 +629,60 @@ const PICON = {"truck": "<path d=\"M2.5 6.5h11v9h-11z\"/><path d=\"M13.5 9.5h4l3
 const pico = (k, color, size=22) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${PICON[k]}</svg>`;
 function reportHTML(id){
   const c = calc[id];
-  const H = (k, cls, title, color) => `<h3><span class="ic">${pico(k, color)}</span>${title}</h3>`;
-  const head = `<div class="corner l"></div><div class="corner r"></div><div class="ph"><img class="logo" src="logo.png" alt="Sneh Buildcon logo"><div class="txt">
-    <div class="co">SNEH BUILDCON PVT. LTD.</div>
-    <div class="dt"><span class="cal">${pico("cal", "#ffffff", 24)}</span>DATE : <span>${dmy(id)}</span></div></div><div></div></div>
+  const wd = parseId(id).toLocaleDateString("en-IN", {weekday:"long"});
+  const H = (k, title, color) => `<h3><span class="ic">${pico(k, color, 18)}</span>${title}</h3>`;
+  const head = `<div class="corner l"></div><div class="corner r"></div>
+    <div class="ph"><img class="logo" src="logo.png" alt="Sneh Buildcon logo"><div class="txt">
+      <div class="co">SNEH BUILDCON PVT. LTD.</div>
+      <div class="dt"><span class="cal">${pico("cal", "#ffffff", 19)}</span>DATE : <span class="d">${dmy(id)}</span><span class="w">${wd}</span></div></div><div></div></div>
     <div class="ph2"><div class="tt">CRUSHER PLANT PRODUCTION &amp; DISPATCH REPORT</div>
-    <div class="tg">TOGETHER WE BUILD<i></i>TOGETHER WE GROW<i></i>TOGETHER WE CREATE</div></div>`;
+      <div class="tg">TOGETHER WE BUILD<i></i>TOGETHER WE GROW<i></i>TOGETHER WE CREATE</div></div>`;
   if (!c) return head + `<div class="noentry"><b>No entry saved for ${dmy(id)}.</b><br>Open the Entry tab to add this day.</div>`;
-  const avg = num(settings.avg)||24;
-  const b1 = `<div class="blk k1">${H("truck","k1","1. Boulder receipt &amp; crushing","#1E7A3F")}<table>
-    <tr><th>Particular</th><th>Quantity (MT)</th><th>Trips</th></tr>
-    <tr><td>Total Boulder Received at Crusher</td><td class="n">${f3(c.recv)}</td><td class="n">${p2(c.recvT)}</td></tr>
-    <tr><td>Boulder Received at Crusher Hopper</td><td class="n">${f3(c.hopper)}</td><td class="n">${p2(c.hopperT)}</td></tr>
-    <tr><td>Boulder Received at Crusher Stock</td><td class="n">${f3(c.toStock)} MT Approx.</td><td class="n">${p2(c.toStockT)}</td></tr>
-    <tr><td>Stock Boulder Up to Date</td><td class="n">${f3(c.close)} MT Approx.</td><td class="n" style="font-size:10px;font-weight:600">– (daily updated)</td></tr>
-    <tr><td>Boulder Crushing from Stock</td><td class="n">${f3(c.fs)} MT</td><td class="n">${p2(c.fsT)}</td></tr>
-    <tr class="tot"><td>Total Boulder Crushing Today</td><td class="n">${f3(c.crush)} MT</td><td class="n">${p2(c.crushT)}</td></tr></table>
-    <div class="note">Note: • Boulder crushing from stock is based on an average of ${Math.round(c.noteS)} MT per vehicle.<br>• Boulder received at crusher stock is based on today's average of ${Math.round(c.noteR).toFixed(1)} MT per vehicle.</div>
-    <table><tr><td>Boulder Received at Crusher – This Month</td><td class="n">${f3(c.mRecv)} MT</td><td class="n">${c.mRecvT} Trips</td></tr>
-    <tr><td>Total Cumulative Production Up to Date</td><td class="n">${f3(c.cum)} MT</td><td class="n">${c.cumT} Trips</td></tr></table></div>`;
-  const b2 = `<div class="blk k2">${H("truck","k2","2. Today's dispatch","#C4261D")}<table>
-    <tr><th>Material</th><th>Quantity (MT)</th><th>Trips</th></tr>
-    ${MATERIALS.map(([m,t,l])=>`<tr><td>${l}</td><td class="n b">${nil3(c[m])}</td><td class="n b">${nil2(c[t])}</td></tr>`).join("")}
-    <tr class="tot"><td>Total Aggregate Dispatch</td><td class="n b">${nil3(c.agg)}</td><td class="n b">${nil2(c.aggT)}</td></tr>
-    <tr class="hot"><td>Total Dispatch – All Material</td><td class="n b" style="font-size:19px">${nil3(c.all)}</td><td class="n b" style="font-size:19px">${nil2(c.allT)}</td></tr></table></div>`;
-  const b3 = `<div class="blk k3 mt">${H("bars","k3","3. Monthly dispatch status","#2457A5")}<table>
-    <tr><th>Particular</th><th>Quantity (MT)</th><th>Trips</th></tr>
-    <tr><td>Total Aggregate Dispatch – This Month</td><td class="n" style="font-size:15px">${f3(c.mAgg)}</td><td class="n" style="font-size:15px">${c.mAggT}</td></tr>
-    <tr><td>Total M-Sand Dispatch – This Month</td><td class="n" style="font-size:15px">${f3(c.mMs)}</td><td class="n" style="font-size:15px">${c.mMsT}</td></tr>
-    <tr class="tot"><td>Total Dispatch – All Material This Month</td><td class="n" style="font-size:15px">${f3(c.mAll)}</td><td class="n" style="font-size:15px">${c.mAllT}</td></tr></table></div>`;
-  const b4 = `<div class="blk k4">${H("clock","k4","4. Plant and equipment's running hours/km","#E07A1F")}<table>
-    <tr><th>Section / Equipment</th><th>Running Hours / KM</th></tr>
-    <tr><td>Primary Section</td><td class="n" style="font-size:15px">${f1(c.hPrimary)} Hrs approx.</td></tr>
-    <tr><td>Secondary Section</td><td class="n" style="font-size:15px">${f1(c.hSecondary)} Hrs.</td></tr>
-    <tr><td>Hyundai Excavator R230</td><td class="n" style="font-size:15px">${f1(c.hExc)} Hrs.</td></tr>
-    <tr><td>JCB UP92T7813</td><td class="n" style="font-size:15px">${f1(c.hJcb)} Hrs.</td></tr>
-    <tr><td>Camper MP07ZM6345</td><td class="n" style="font-size:15px">${km(c.hCamper)} km</td></tr></table></div>`;
-  const b5 = `<div class="blk k5">${H("clip","k5","5. Remarks","#6B3FA0")}
-    <div class="rm"><b>Primary Section :</b>${esc(c.rPrimary)||"–"}</div>
-    <div class="rm"><b>Secondary Section :</b>${esc(c.rSecondary)||"–"}</div></div>`;
-  const b6 = `<div class="blk k6 mt">${H("fuel","k6","6. Fuel (diesel)","#0E8584")}<div class="fuel">
-    <div class="box"><div class="l">Diesel Received Today:</div><div class="v">${pico("fuel","#0E8584",34)}${c.dsl?fmtInt(c.dsl)+" Ltr":"NIL"}</div></div>
-    <table><tr><th>Equipment / Vehicle</th><th>Diesel Received Today</th></tr>
-      <tr><td>Camper MP07ZM6345</td><td class="n">${fmtInt(c.dCamper)} Ltr</td></tr>
-      <tr><td>JCB UP92T7813</td><td class="n">${fmtInt(c.dJcb)} Ltr</td></tr>
-      <tr><td>Hyundai Excavator R230</td><td class="n">${fmtInt(c.dExc)} Ltr</td></tr></table>
-    <div class="box"><div class="l">Total Diesel Consumption This Month</div><div class="v">${fmtInt(c.mDsl)} Litres</div></div></div></div>`;
-  const prep = settings.preparedBy ? `<div class="prep">Prepared by:<span>${esc(settings.preparedBy)}</span></div>` : "";
-  return head + `<div class="cols top"><div>${b1}</div><div>${b2}${b3}</div></div>
-    <div class="cols mt"><div>${b4}</div><div>${b5}</div></div>${b6}${prep}`;
+  const tr = (l, v, t, cls="") => `<tr class="${cls}"><td>${l}</td><td class="n">${v}</td>${t===undefined?"":`<td class="t">${t}</td>`}</tr>`;
+  const kpis = `<div class="kpis">
+    <div class="kp g"><span>Crushing today</span><b>${f3(c.crush)}<small>MT</small></b><i>${p2(c.crushT)} trips</i></div>
+    <div class="kp r"><span>Dispatch today</span><b>${nil3(c.all)}${c.all?"<small>MT</small>":""}</b><i>${nil2(c.allT)} trips</i></div>
+    <div class="kp d"><span>Boulder stock</span><b>${f3(c.close)}<small>MT</small></b><i>approx., up to date</i></div>
+    <div class="kp b"><span>Month dispatch</span><b>${fmtInt(c.mAll)}<small>MT</small></b><i>${c.mAllT} trips</i></div></div>`;
+  const b1 = `<div class="sec k1">${H("truck","1. Boulder receipt &amp; crushing","#1E7A3F")}<table>
+    <tr><th>Particular</th><th>MT</th><th>Trips</th></tr>
+    ${tr("Received at crusher", f3(c.recv), p2(c.recvT))}
+    ${tr("Direct to hopper", f3(c.hopper), p2(c.hopperT))}
+    ${tr("To stock (approx.)", f3(c.toStock), p2(c.toStockT))}
+    ${tr("Crushed from stock", f3(c.fs), p2(c.fsT))}
+    ${tr("Total crushing today", f3(c.crush), p2(c.crushT), "tot")}
+    ${tr("Stock up to date", "≈ " + f3(c.close), "", "tot")}
+    ${tr("Received this month", f3(c.mRecv), c.mRecvT, "sub")}
+    ${tr("Cumulative up to date", f3(c.cum), c.cumT, "sub")}</table>
+    <div class="note">Note: • Boulder crushing from stock is based on an average of ${Math.round(c.noteS)} MT per vehicle.<br>• Boulder received at crusher stock is based on today's average of ${Math.round(c.noteR).toFixed(1)} MT per vehicle.</div></div>`;
+  const b4 = `<div class="sec k4">${H("clock","4. Plant and equipment's running hours/km","#D9701A")}<table>
+    <tr><th>Section / Equipment</th><th>Hours / KM</th></tr>
+    ${tr("Primary Section", f1(c.hPrimary) + " Hrs approx.")}
+    ${tr("Secondary Section", f1(c.hSecondary) + " Hrs.")}
+    ${tr("Hyundai Excavator R230", f1(c.hExc) + " Hrs.")}
+    ${tr("JCB UP92T7813", f1(c.hJcb) + " Hrs.")}
+    ${tr("Camper MP07ZM6345", km(c.hCamper) + " km")}</table></div>`;
+  const b2 = `<div class="sec k2">${H("truck","2. Today's dispatch","#C4261D")}<table>
+    <tr><th>Material</th><th>MT</th><th>Trips</th></tr>
+    ${MATERIALS.map(([m,t,l]) => tr(l.replace(" Aggregate",""), nil3(c[m]), nil2(c[t]))).join("")}
+    ${tr("Total aggregate", nil3(c.agg), nil2(c.aggT), "tot")}
+    ${tr("Total dispatch", nil3(c.all), nil2(c.allT), "tot")}</table></div>`;
+  const b3 = `<div class="sec k3">${H("bars","3. Monthly dispatch status","#2457A5")}<table>
+    <tr><th>This month</th><th>MT</th><th>Trips</th></tr>
+    ${tr("Total aggregate", f3(c.mAgg), c.mAggT)}
+    ${tr("Total M-Sand", f3(c.mMs), c.mMsT)}
+    ${tr("All material", f3(c.mAll), c.mAllT, "tot")}</table></div>`;
+  const b6 = `<div class="sec k6">${H("fuel","6. Fuel (diesel)","#0E7F7E")}<table>
+    <tr><th>Received today</th><th>Litres</th></tr>
+    ${tr("Camper MP07ZM6345", c.dCamper ? fmtInt(c.dCamper) : "NIL")}
+    ${tr("JCB UP92T7813", c.dJcb ? fmtInt(c.dJcb) : "NIL")}
+    ${tr("Hyundai Excavator R230", c.dExc ? fmtInt(c.dExc) : "NIL")}
+    ${tr("Total today", c.dsl ? fmtInt(c.dsl) + " Ltr" : "NIL", undefined, "tot")}
+    ${tr("Total this month", fmtInt(c.mDsl) + " Litres", undefined, "tot")}</table></div>`;
+  const b5 = `<div class="sec k5" style="margin-top:10px">${H("clip","5. Remarks","#6B3FA0")}<div class="rmk">
+    <div><b>Primary section</b>${esc(c.rPrimary)||"–"}</div><div><b>Secondary section</b>${esc(c.rSecondary)||"–"}</div></div></div>`;
+  const foot = settings.preparedBy ? `<div class="foot">Prepared by: <b>${esc(settings.preparedBy)}</b></div>` : "";
+  return head + kpis + `<div class="cols"><div class="col">${b1}${b4}</div><div class="col">${b2}${b3}${b6}</div></div>` + b5 + foot;
 }
 function whatsappText(id){
   const c = calc[id]; if (!c) return "";
@@ -690,7 +705,7 @@ function whatsappText(id){
 function fitPaper(){
   const wrap = document.querySelector(".paperwrap"), paper = $("paper");
   if (!wrap || wrap.offsetParent === null) return;
-  const k = Math.min(1, wrap.clientWidth / 900);
+  const k = Math.min(1, wrap.clientWidth / 720);
   paper.style.transform = "scale(" + k + ")";
   wrap.style.height = Math.ceil(paper.offsetHeight * k) + "px";
 }
@@ -908,7 +923,7 @@ async function makeImage(){
   const clone = $("paper").cloneNode(true); clone.removeAttribute("id"); clone.style.transform = "none"; clone.style.position = "relative";
   holder.appendChild(clone); document.body.appendChild(holder);
   await Promise.all([...clone.querySelectorAll("img")].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
-  try { const canvas = await html2canvas(clone, {scale:2, backgroundColor:"#ffffff", width:900, windowWidth:960});
+  try { const canvas = await html2canvas(clone, {scale:2.5, backgroundColor:"#ffffff", width:720, windowWidth:780});
         return await new Promise(r => canvas.toBlob(r, "image/png")); }
   finally { holder.remove(); }
 }
@@ -1103,6 +1118,12 @@ $("restoreBtn").addEventListener("click", () => $("restoreFile").click());
 $("restoreFile").addEventListener("change", e => { const f=e.target.files[0]; if (f) readBackup(f); e.target.value=""; });
 $("restoreApply").addEventListener("click", applyRestore);
 $("sheetClose").addEventListener("click", closeSheet);
+function viewFull(){
+  if (!imgCache || imgCache.id !== selected) { toast("Preparing image… try again in a second."); prepareImage(); return; }
+  openSheet({title:"Report – " + dmy(selected), blob:imgCache.blob, name:imgCache.name, image:true, hint:"Pinch to zoom. Tap Save to keep it on the phone."});
+}
+$("viewFull").addEventListener("click", viewFull);
+$("paperwrap").addEventListener("click", viewFull);
 $("sheet").addEventListener("click", e => { if (e.target === $("sheet")) closeSheet(); });
 let deferredPrompt = null;
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredPrompt = e; $("installCard").hidden = false; });
