@@ -414,7 +414,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
         <button type="submit" class="btn primary" id="saveSettings">Save settings</button>
       </div>
     </form>
-    <p class="small" style="text-align:center">App version 18 · 24-Oct-2026</p>
+    <p class="small" style="text-align:center">App version 19 · 24-Oct-2026</p>
     <div class="card"><h2>Delete this day</h2><div class="body">
       <p style="margin:0;font-size:13px;color:var(--muted)">Removes the entry for the date shown at the top. Stock and month totals recalculate.</p>
       <button class="btn danger" id="deleteDay">Delete entry for this date</button>
@@ -563,8 +563,28 @@ function fillForm(d){
   dirty = false; updateDayState(); renderCalcs();
 }
 function draftKey(id){ return "plantlog-draft-"+id; }
-function saveDraft(){ try{ localStorage.setItem(draftKey(selected), JSON.stringify(readForm())); }catch(e){} }
-function loadDraft(id){ try{ const s=localStorage.getItem(draftKey(id)); return s?JSON.parse(s):null; }catch(e){ return null; } }
+function saveDraft(){ try{ localStorage.setItem(draftKey(selected), JSON.stringify({at:new Date().toISOString(), form:readForm()})); }catch(e){} }
+// A draft is only kept while it holds real unsaved typing: it is dropped when it matches the saved day,
+// or when the saved day was changed after the draft was made (e.g. newer figures from the database).
+function sameAsSaved(form, d){
+  const blank = v => v === null || v === undefined || v === "" || Number(v) === 0;
+  for (const f of [...NUM_FIELDS, ...OPT_FIELDS]) {
+    if (!(f in form)) continue;
+    const a = form[f], b = d ? d[f] : null;
+    if (blank(a) && blank(b)) continue;
+    if (num(a) !== num(b)) return false;
+  }
+  for (const f of TEXT_FIELDS) if ((f in form) && (form[f] || "").trim() !== ((d && d[f]) || "").trim()) return false;
+  return true;
+}
+function loadDraft(id){
+  let raw = null; try { raw = JSON.parse(localStorage.getItem(draftKey(id)) || "null"); } catch(e){ return null; }
+  if (!raw) return null;
+  const form = raw.form || raw, at = raw.at || "";          // older drafts have no time
+  const saved = days[id];
+  if (sameAsSaved(form, saved) || (saved && saved.updatedAt && saved.updatedAt > at)) { clearDraft(id); return null; }
+  return form;
+}
 function clearDraft(id){ try{ localStorage.removeItem(draftKey(id)); }catch(e){} }
 
 let lastPreview = null;
