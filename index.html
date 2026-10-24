@@ -238,13 +238,61 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
 .mtable tr.tot td{font-weight:800}
 .mhead{display:flex;justify-content:space-between;align-items:baseline;padding:10px 14px;background:var(--surface-2);border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
 .mhead b{color:var(--ink);font-size:14px}
+
+/* ---------- compact entry form (v22) ---------- */
+@media (max-width:480px){.wrap{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}}
+header.top .wrap{padding-block:8px;gap:6px}
+.brand h1{font-size:19px}.brand .sub{font-size:11px}
+.hs{display:grid;justify-items:end;gap:3px}
+.datebar{grid-template-columns:40px 1fr 40px auto}
+.iconbtn,.datepick,.todaybtn{height:40px}.datepick{font-size:16px}
+main{padding-block:10px 20px} section.tab{gap:10px}
+.nextcard{padding:6px 6px 6px 12px}.nextcard .btn{height:38px}
+.banner{padding:8px 10px;font-size:13px}
+#entryForm{gap:10px!important}
+#entryForm .card>h2{font-size:16px;padding:7px 12px;gap:8px}
+#entryForm .card>h2 .num{width:22px;height:22px;font-size:14px;border-radius:5px}
+#entryForm .card .body{padding:8px 10px 10px;gap:8px}
+.tbl{display:grid;gap:6px}
+.tbl .th,.tbl .tr{display:grid;grid-template-columns:minmax(0,1fr) 86px 102px;gap:6px;align-items:center}
+.tbl .th span{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;text-align:center}
+.tbl label{font-size:13.5px;font-weight:600;line-height:1.2;min-width:0}
+.tbl .lc{display:grid;gap:3px;justify-items:start;min-width:0}
+input.nb{width:100%;height:40px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface-2);padding:0 8px;font-size:17px;font-weight:700;text-align:right;min-width:0}
+input.nb:focus,#entryForm .inp input:focus{border-color:var(--focus);outline:none;background:var(--surface)}
+#entryForm .stepper{height:40px;grid-template-columns:30px 1fr 30px;border-radius:8px}
+#entryForm .stepper button{font-size:19px}
+#entryForm .stepper input{font-size:17px;font-weight:700}
+#entryForm .stepper:focus-within{border-color:var(--focus)}
+.chip.xs{padding:2px 8px;font-size:11.5px;border-width:1px}
+.minis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 8px}
+.mf{display:grid;gap:2px;min-width:0}
+.mf label{font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#entryForm .inp input{height:40px;font-size:17px;font-weight:700;padding:0 30px 0 8px;border-radius:8px}
+#entryForm .inp .u{right:8px;font-size:11px}
+#entryForm .calc{padding:7px 10px;gap:3px;font-size:13px}
+#entryForm .calc .row.total{font-size:14px;padding-top:4px}
+#entryForm .calc .row .t{font-size:11px}
+#entryForm .field textarea{min-height:58px;font-size:15px;padding:8px 10px;border-radius:8px}
+#entryForm .field label{font-size:12px}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:-2px -10px 0;padding:0 10px 2px}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chips.scroll .chip{flex:0 0 auto;padding:5px 10px;font-size:12.5px;white-space:nowrap}
+#entryForm .warnline{font-size:12px}
+.linkbtn{font-size:13px;padding:2px 0}
+.btn{height:46px;font-size:16px}
+.savebar #discardBtn{height:46px}
+nav.tabs button{height:56px;padding-top:4px}
+body{padding-bottom:calc(66px + env(safe-area-inset-bottom,0px))}
+.savebar{bottom:calc(62px + env(safe-area-inset-bottom,0px))}
+#toast{bottom:calc(130px + env(safe-area-inset-bottom,0px))}
 </style>
 </head><body>
 <header class="top">
   <div class="wrap">
     <div class="brand">
       <div><h1>Sneh Buildcon</h1><div class="sub">Crusher plant daily log</div></div>
-      <div class="status" id="status">Loading…</div>
+      <div class="hs"><div class="status" id="status">Loading…</div><span class="daystate new" id="dayState">Not entered yet</span></div>
     </div>
     <div class="datebar">
       <button class="iconbtn" id="prevDay" aria-label="Previous day">‹</button>
@@ -252,7 +300,6 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
       <button class="iconbtn" id="nextDay" aria-label="Next day">›</button>
       <button class="todaybtn" id="latestBtn">Latest</button>
     </div>
-    <span class="daystate new" id="dayState">Not entered yet</span>
   </div>
 </header>
 
@@ -266,29 +313,12 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
       <div class="card c1">
         <h2><span class="num">1</span>Boulder receipt &amp; crushing</h2>
         <div class="body">
-          <div class="mat-row">
-            <div class="field"><label for="recv">Received at crusher</label><div class="inp"><input id="recv" inputmode="decimal" placeholder="0"><span class="u">MT</span></div></div>
-            <div class="field"><label for="recvT">Trips</label><div class="stepper">
-              <button type="button" data-step="recvT" data-d="-1" aria-label="One trip less">−</button>
-              <input id="recvT" inputmode="numeric" placeholder="0">
-              <button type="button" data-step="recvT" data-d="1" aria-label="One trip more">+</button></div></div>
+          <div class="tbl">
+            <div class="th"><span></span><span>MT</span><span>Trips</span></div>
+            <div class="tr"><label for="recv">Received at crusher</label><input id="recv" class="nb" inputmode="decimal" enterkeyhint="next" placeholder="0"><div class="stepper"><button type="button" data-step="recvT" data-d="-1" aria-label="One trip less">−</button><input id="recvT" inputmode="numeric" enterkeyhint="next" placeholder="0" aria-label="Trips"><button type="button" data-step="recvT" data-d="1" aria-label="One trip more">+</button></div></div>
+            <div class="tr"><div class="lc"><label for="hopper">Direct to hopper</label><button type="button" class="chip xs" id="sameAsRecv">= all received</button></div><input id="hopper" class="nb" inputmode="decimal" enterkeyhint="next" placeholder="0"><div class="stepper"><button type="button" data-step="hopT" data-d="-1" aria-label="One trip less">−</button><input id="hopT" inputmode="numeric" enterkeyhint="next" placeholder="0" aria-label="Trips"><button type="button" data-step="hopT" data-d="1" aria-label="One trip more">+</button></div></div>
+            <div class="tr"><label for="fromStock">Crushed from stock</label><input id="fromStock" class="nb" inputmode="decimal" enterkeyhint="next" placeholder="0"><div class="stepper"><button type="button" data-step="fsT" data-d="-1" aria-label="One trip less">−</button><input id="fsT" inputmode="numeric" enterkeyhint="next" placeholder="0" aria-label="Trips"><button type="button" data-step="fsT" data-d="1" aria-label="One trip more">+</button></div></div>
           </div>
-          <div class="mat-row">
-            <div class="field"><label for="hopper">Direct to hopper</label><div class="inp"><input id="hopper" inputmode="decimal" placeholder="0"><span class="u">MT</span></div></div>
-            <div class="field"><label for="hopT">Trips</label><div class="stepper">
-              <button type="button" data-step="hopT" data-d="-1" aria-label="One trip less">−</button>
-              <input id="hopT" inputmode="numeric" placeholder="0">
-              <button type="button" data-step="hopT" data-d="1" aria-label="One trip more">+</button></div></div>
-          </div>
-          <div class="chips"><button type="button" class="chip" id="sameAsRecv">Hopper = all received</button></div>
-          <div class="mat-row">
-            <div class="field"><label for="fromStock">Crushed from stock</label><div class="inp"><input id="fromStock" inputmode="decimal" placeholder="0"><span class="u">MT</span></div></div>
-            <div class="field"><label for="fsT">Trips</label><div class="stepper">
-              <button type="button" data-step="fsT" data-d="-1" aria-label="One trip less">−</button>
-              <input id="fsT" inputmode="numeric" placeholder="0">
-              <button type="button" data-step="fsT" data-d="1" aria-label="One trip more">+</button></div></div>
-          </div>
-          <p class="small">Enter the counted trips. The average MT per vehicle for the report Note is worked out from them.</p>
           <div class="calc" id="calcNotes"></div>
           <div class="calc" id="calc1"></div>
         </div>
@@ -301,28 +331,18 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
       </div>
 
       <div class="card c4">
-        <h2><span class="num">4</span>Plant and equipment's running hours/km</h2>
+        <h2><span class="num">4</span>Running hours / km</h2>
         <div class="body">
-          <div class="grid2">
-            <div class="field"><label for="hPrimary">Primary section</label><div class="inp"><input id="hPrimary" inputmode="decimal" placeholder="0"><span class="u">Hrs</span></div></div>
-            <div class="field"><label for="hSecondary">Secondary section</label><div class="inp"><input id="hSecondary" inputmode="decimal" placeholder="0"><span class="u">Hrs</span></div></div>
-            <div class="field"><label for="hExc">Hyundai Excavator R230</label><div class="inp"><input id="hExc" inputmode="decimal" placeholder="0"><span class="u">Hrs</span></div></div>
-            <div class="field"><label for="hJcb">JCB UP92T7813</label><div class="inp"><input id="hJcb" inputmode="decimal" placeholder="0"><span class="u">Hrs</span></div></div>
-            <div class="field"><label for="hCamper">Camper MP07ZM6345</label><div class="inp"><input id="hCamper" inputmode="decimal" placeholder="0"><span class="u">km</span></div></div>
-          </div>
+          <div class="minis"><div class="mf"><label for="hPrimary">Primary</label><div class="inp"><input id="hPrimary" inputmode="decimal" enterkeyhint="next" placeholder="0"><span class="u">hrs</span></div></div><div class="mf"><label for="hSecondary">Secondary</label><div class="inp"><input id="hSecondary" inputmode="decimal" enterkeyhint="next" placeholder="0"><span class="u">hrs</span></div></div><div class="mf"><label for="hExc">Hyundai R230</label><div class="inp"><input id="hExc" inputmode="decimal" enterkeyhint="next" placeholder="0"><span class="u">hrs</span></div></div><div class="mf"><label for="hJcb">JCB 7813</label><div class="inp"><input id="hJcb" inputmode="decimal" enterkeyhint="next" placeholder="0"><span class="u">hrs</span></div></div><div class="mf"><label for="hCamper">Camper 6345</label><div class="inp"><input id="hCamper" inputmode="decimal" enterkeyhint="next" placeholder="0"><span class="u">km</span></div></div></div>
           <div class="warnbox" id="calc4"></div>
           <button type="button" class="linkbtn" id="copyPrev" hidden></button>
         </div>
       </div>
 
       <div class="card c6">
-        <h2><span class="num">5</span>Fuel (diesel) received today</h2>
+        <h2><span class="num">5</span>Diesel received today</h2>
         <div class="body">
-          <div class="grid3">
-            <div class="field"><label for="dCamper">Camper MP07ZM6345</label><div class="inp"><input id="dCamper" inputmode="decimal" placeholder="0"><span class="u">Ltr</span></div></div>
-            <div class="field"><label for="dJcb">JCB UP92T7813</label><div class="inp"><input id="dJcb" inputmode="decimal" placeholder="0"><span class="u">Ltr</span></div></div>
-            <div class="field"><label for="dExc">Hyundai Exc. R230</label><div class="inp"><input id="dExc" inputmode="decimal" placeholder="0"><span class="u">Ltr</span></div></div>
-          </div>
+          <div class="minis"><div class="mf"><label for="dCamper">Camper 6345</label><div class="inp"><input id="dCamper" inputmode="decimal" enterkeyhint="next" placeholder="0"><span class="u">L</span></div></div><div class="mf"><label for="dJcb">JCB 7813</label><div class="inp"><input id="dJcb" inputmode="decimal" enterkeyhint="next" placeholder="0"><span class="u">L</span></div></div><div class="mf"><label for="dExc">Hyundai R230</label><div class="inp"><input id="dExc" inputmode="decimal" enterkeyhint="next" placeholder="0"><span class="u">L</span></div></div></div>
           <div class="calc" id="calc6"></div>
         </div>
       </div>
@@ -330,10 +350,10 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
       <div class="card c5">
         <h2><span class="num">6</span>Remarks</h2>
         <div class="body">
-          <div class="field"><label for="rPrimary">Primary section</label><textarea id="rPrimary" rows="2" placeholder="Type, or tap a phrase below"></textarea></div>
-          <div class="chips"><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was running well during both shifts as boulder was available.">+ Running well</button><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was running low due to boulder not available from mine&#x27;s.">+ Boulder not available</button><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was running from stock boulder only because boulder was not available from the mines.">+ From stock only</button><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was not running due to breakdown / maintenance work.">+ Breakdown / maintenance</button></div>
-          <div class="field"><label for="rSecondary">Secondary section</label><textarea id="rSecondary" rows="2" placeholder="Type, or tap a phrase below"></textarea></div>
-          <div class="chips"><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was running well during both shifts.">+ Running well</button><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was running low due to no material in the tunnel feeder.">+ No material in tunnel</button><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was not running properly due to power cut.">+ Power cut</button><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was not running due to maintenance work.">+ Maintenance</button></div>
+          <div class="field"><label for="rPrimary">Primary section</label><textarea id="rPrimary" rows="2" placeholder="Type, or tap a phrase"></textarea></div>
+          <div class="chips scroll"><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was running well during both shifts as boulder was available.">+ Running well</button><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was running low due to boulder not available from mine&#x27;s.">+ Boulder not available</button><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was running from stock boulder only because boulder was not available from the mines.">+ From stock only</button><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was not running due to breakdown / maintenance work.">+ Breakdown / maintenance</button></div>
+          <div class="field"><label for="rSecondary">Secondary section</label><textarea id="rSecondary" rows="2" placeholder="Type, or tap a phrase"></textarea></div>
+          <div class="chips scroll"><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was running well during both shifts.">+ Running well</button><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was running low due to no material in the tunnel feeder.">+ No material in tunnel</button><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was not running properly due to power cut.">+ Power cut</button><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was not running due to maintenance work.">+ Maintenance</button></div>
         </div>
       </div>
 
@@ -422,7 +442,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
         <button type="submit" class="btn primary" id="saveSettings">Save settings</button>
       </div>
     </form>
-    <p class="small" style="text-align:center">App version 21 · 24-Oct-2026</p>
+    <p class="small" style="text-align:center">App version 22 · 24-Oct-2026</p>
     <div class="card"><h2>Delete this day</h2><div class="body">
       <p style="margin:0;font-size:13px;color:var(--muted)">Removes the entry for the date shown at the top. Stock and month totals recalculate.</p>
       <button class="btn danger" id="deleteDay">Delete entry for this date</button>
@@ -547,14 +567,9 @@ function previewRow(id, d){
 
 /* ---------- form ---------- */
 function buildDispatchFields(){
-  $("dispatchFields").innerHTML = MATERIALS.map(([m,t,label]) => `
-    <div class="mat-row">
-      <div class="field"><label for="${m}">${label}</label><div class="inp"><input id="${m}" inputmode="decimal" placeholder="0"><span class="u">MT</span></div></div>
-      <div class="field"><label for="${t}">Trips</label><div class="stepper">
-        <button type="button" data-step="${t}" data-d="-1" aria-label="One trip less">−</button>
-        <input id="${t}" inputmode="numeric" placeholder="0">
-        <button type="button" data-step="${t}" data-d="1" aria-label="One trip more">+</button></div></div>
-    </div>`).join("");
+  $("dispatchFields").innerHTML = `<div class="tbl"><div class="th"><span></span><span>MT</span><span>Trips</span></div>` + MATERIALS.map(([m,t,label]) => `
+    <div class="tr"><label for="${m}">${label.replace(" Aggregate","")}</label><input id="${m}" class="nb" inputmode="decimal" enterkeyhint="next" placeholder="0">
+      <div class="stepper"><button type="button" data-step="${t}" data-d="-1" aria-label="One trip less">−</button><input id="${t}" inputmode="numeric" enterkeyhint="next" placeholder="0" aria-label="${label} trips"><button type="button" data-step="${t}" data-d="1" aria-label="One trip more">+</button></div></div>`).join("") + `</div>`;
 }
 function readForm(){
   const o = {};
@@ -617,7 +632,7 @@ function renderCalcs(){
     ${over?'<div class="warnline">Hopper is more than received. Check the numbers.</div>':""}
     ${neg?'<div class="warnline">Stock is below zero: more crushed from stock than was there. Check today\'s and earlier days\' trips and MT.</div>':""}`;
   $("calc2").innerHTML = `
-    <div class="row"><span>Total aggregate (10+20+30 MM)</span><b>${f3(c.agg)} MT<span class="t">${p2(c.aggT)} trips</span></b></div>
+    <div class="row"><span>Total aggregate</span><b>${f3(c.agg)} MT<span class="t">${p2(c.aggT)} trips</span></b></div>
     <div class="row total"><span>Total dispatch – all material</span><b>${f3(c.all)} MT<span class="t">${p2(c.allT)} trips</span></b></div>
     <div class="row"><span>This month, all material</span><b>${f3(c.mAll)} MT<span class="t">${fmtInt(c.mAllT)} trips</span></b></div>`;
   const hw = [["Primary section",c.hPrimary],["Secondary section",c.hSecondary],["Hyundai Excavator",c.hExc],["JCB",c.hJcb]]

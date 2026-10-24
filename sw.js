@@ -1,5 +1,5 @@
 // Offline cache for Crusher Plant Log. Bump VERSION when files change so phones pick up the update.
-const VERSION = "plantlog-v21";
+const VERSION = "plantlog-v22";
 const FILES = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "logo.png", "tracker-template.xlsx", "firebase-config.js",
   "chart.umd.js", "html2canvas.min.js", "xlsx.full.min.js", "jszip.min.js", "firebase-app-compat.js", "firebase-auth-compat.js", "firebase-firestore-compat.js"];
 self.addEventListener("install", e => {
