@@ -252,14 +252,14 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
             <div class="field"><label for="recv">Received at crusher</label><div class="inp"><input id="recv" inputmode="decimal" placeholder="0"><span class="u">MT</span></div></div>
             <div class="field"><label for="recvT">Trips</label><div class="stepper">
               <button type="button" data-step="recvT" data-d="-1" aria-label="One trip less">−</button>
-              <input id="recvT" inputmode="numeric" placeholder="auto">
+              <input id="recvT" inputmode="numeric" placeholder="0">
               <button type="button" data-step="recvT" data-d="1" aria-label="One trip more">+</button></div></div>
           </div>
           <div class="mat-row">
             <div class="field"><label for="hopper">Direct to hopper</label><div class="inp"><input id="hopper" inputmode="decimal" placeholder="0"><span class="u">MT</span></div></div>
             <div class="field"><label for="hopT">Trips</label><div class="stepper">
               <button type="button" data-step="hopT" data-d="-1" aria-label="One trip less">−</button>
-              <input id="hopT" inputmode="numeric" placeholder="auto">
+              <input id="hopT" inputmode="numeric" placeholder="0">
               <button type="button" data-step="hopT" data-d="1" aria-label="One trip more">+</button></div></div>
           </div>
           <div class="chips"><button type="button" class="chip" id="sameAsRecv">Hopper = all received</button></div>
@@ -267,19 +267,11 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
             <div class="field"><label for="fromStock">Crushed from stock</label><div class="inp"><input id="fromStock" inputmode="decimal" placeholder="0"><span class="u">MT</span></div></div>
             <div class="field"><label for="fsT">Trips</label><div class="stepper">
               <button type="button" data-step="fsT" data-d="-1" aria-label="One trip less">−</button>
-              <input id="fsT" inputmode="numeric" placeholder="auto">
+              <input id="fsT" inputmode="numeric" placeholder="0">
               <button type="button" data-step="fsT" data-d="1" aria-label="One trip more">+</button></div></div>
           </div>
-          <p class="small">Trips in grey are worked out from MT. Type or use − / + to enter the counted trips.</p>
-          <div class="grid2">
-            <div class="field"><label for="noteStockAvg">Note 1: avg MT / vehicle from stock</label><div class="inp"><input id="noteStockAvg" inputmode="decimal"><span class="u">MT</span></div></div>
-            <div class="field"><label for="noteRecvAvg">Note 2: today's avg MT / vehicle at stock</label><div class="inp"><input id="noteRecvAvg" inputmode="decimal"><span class="u">MT</span></div></div>
-          </div>
-          <p class="small" style="margin-top:-4px">Printed in the Note on the report. Blank = previous day's value.</p>
-          <details class="opt" id="optBox"><summary>Correct the stock (only if the calculated stock is wrong)</summary>
-            <div class="field"><label for="phys">Actual boulder stock at end of today</label><div class="inp"><input id="phys" inputmode="decimal" placeholder="leave blank"><span class="u">MT</span></div>
-              <span class="hint">Normally leave blank: the app calculates stock as yesterday's stock + went to stock − crushed from stock. Type a figure only when the real stock on the ground is different (e.g. after measuring the pile). That figure is used from then on.</span></div>
-          </details>
+          <p class="small">Enter the counted trips. The average MT per vehicle for the report Note is worked out from them.</p>
+          <div class="calc" id="calcNotes"></div>
           <div class="calc" id="calc1"></div>
         </div>
       </div>
@@ -383,7 +375,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
         <div class="grid2">
           <div class="field"><label for="s_startDate">Start date</label><div class="inp"><input id="s_startDate" type="date" style="padding-right:12px"></div></div>
           <div class="field"><label for="s_openStock">Boulder stock on start morning</label><div class="inp"><input id="s_openStock" inputmode="decimal"><span class="u">MT</span></div></div>
-          <div class="field"><label for="s_avg">Avg MT per boulder trip</label><div class="inp"><input id="s_avg" inputmode="decimal"><span class="u">MT</span></div></div>
+          <div class="field"><label for="s_avg">Starting avg MT per vehicle (only until trips are entered)</label><div class="inp"><input id="s_avg" inputmode="decimal"><span class="u">MT</span></div></div>
           <div class="field"><label for="s_preparedBy">Prepared by</label><div class="inp"><input id="s_preparedBy" style="padding-right:12px"></div></div>
           <div class="field"><label for="s_obRecvMT">Boulder received this month</label><div class="inp"><input id="s_obRecvMT" inputmode="decimal"><span class="u">MT</span></div></div>
           <div class="field"><label for="s_obRecvT">…trips</label><div class="inp"><input id="s_obRecvT" inputmode="numeric"><span class="u">trips</span></div></div>
@@ -398,7 +390,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
         <button type="submit" class="btn primary" id="saveSettings">Save settings</button>
       </div>
     </form>
-    <p class="small" style="text-align:center">App version 10 · 24-Oct-2026</p>
+    <p class="small" style="text-align:center">App version 11 · 24-Oct-2026</p>
     <div class="card"><h2>Delete this day</h2><div class="body">
       <p style="margin:0;font-size:13px;color:var(--muted)">Removes the entry for the date shown at the top. Stock and month totals recalculate.</p>
       <button class="btn danger" id="deleteDay">Delete entry for this date</button>
@@ -428,7 +420,7 @@ const $ = id => document.getElementById(id);
 const MATERIALS = [["d10","t10","10 MM Aggregate"],["d20","t20","20 MM Aggregate"],["d30","t30","30 MM Aggregate"],["ms","tms","M-Sand"]];
 const NUM_FIELDS = ["recv","hopper","fromStock","d10","t10","d20","t20","d30","t30","ms","tms","hPrimary","hSecondary","hExc","hJcb","dCamper","dJcb","dExc"];
 const TEXT_FIELDS = ["rPrimary","rSecondary"];
-const OPT_FIELDS = ["recvT","hopT","fsT","phys","noteStockAvg","noteRecvAvg"];
+const OPT_FIELDS = ["recvT","hopT","fsT","phys"];
 const NOTE_SEED = {"2026-10-01": [15, 25.5], "2026-10-02": [20, 25.0], "2026-10-03": [20, 25.0], "2026-10-05": [20, 25.0], "2026-10-06": [20, 23.0], "2026-10-07": [20, 24.0], "2026-10-08": [20, 24.0], "2026-10-09": [20, 23.0], "2026-10-10": [20, 25.0], "2026-10-11": [20, 25.0], "2026-10-12": [20, 23.0], "2026-10-13": [20, 23.0], "2026-10-14": [20, 23.0], "2026-10-15": [20, 23.0], "2026-10-16": [24, 24.0], "2026-10-18": [20, 24.0]};
 const SEED = {"settings":{"startDate":"2026-10-01","openStock":355,"avg":20,"preparedBy":"Hemant Shukla","obRecvMT":0,"obRecvT":0,"obCumMT":67417.5,"obCumT":2864,"obAggMT":0,"obAggT":0,"obMsMT":0,"obMsT":0,"obDiesel":0},"days":{"2026-10-01":{"recv":464.82,"recvT":19,"hopper":364.82,"hopT":15,"fromStock":220,"fsT":11,"phys":null,"d10":43.61,"t10":2,"d20":233.25,"t20":8,"d30":116.15,"t30":4,"ms":156.0,"tms":5,"hPrimary":6.0,"hSecondary":7.0,"hExc":7.3,"hJcb":4.2,"dCamper":0,"dJcb":0,"dExc":294,"rPrimary":"The primary section was running very low due to boulder not available.","rSecondary":"The secondary section was not running during day shift due to pro wash plant wire mesh change, vibrator feeder motor 1no. installation and salary cleaning.","date":"2026-10-01"},"2026-10-02":{"recv":594.9,"recvT":24,"hopper":419.9,"hopT":17,"fromStock":0,"fsT":0,"phys":null,"d10":65.74,"t10":3,"d20":0,"t20":0,"d30":86.09,"t30":4,"ms":171.49,"tms":5,"hPrimary":4.0,"hSecondary":10.0,"hExc":6.3,"hJcb":3.5,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"The primary section was running as boulder available.","rSecondary":"The secondary section was not running well during both shift due to power cut and BC 2 V belt damaged.","date":"2026-10-02"},"2026-10-03":{"recv":894.26,"recvT":37,"hopper":894.26,"hopT":37,"fromStock":100,"fsT":5,"phys":null,"d10":60.71,"t10":3,"d20":105.44,"t20":4,"d30":251.33,"t30":10,"ms":375.42,"tms":14,"hPrimary":11.0,"hSecondary":12.0,"hExc":7.3,"hJcb":6.5,"dCamper":30,"dJcb":101,"dExc":200,"rPrimary":"The primary section was running as per boulder availability.","rSecondary":"The secondary section did not run properly during both shifts due to two power cuts during the day shift and HP Cone V-belt damage during the night shift.","date":"2026-10-03"},"2026-10-04":{"recv":1097.74,"recvT":48,"hopper":0,"hopT":null,"fromStock":0,"fsT":null,"phys":50,"d10":0,"t10":0,"d20":183.65,"t20":7,"d30":0,"t30":0,"ms":226.18,"tms":7,"hPrimary":0,"hSecondary":0,"hExc":0,"hJcb":0,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"ESTIMATE \u2013 04-10 report not received. Received boulder and dispatch back-calculated from 05-10 month totals.","rSecondary":"ESTIMATE \u2013 aggregate split by size unknown (all 183.650 MT / 7 trips put under 20 MM). Replace with the real 04-10 report.","date":"2026-10-04"},"2026-10-05":{"recv":161.58,"recvT":7,"hopper":111.58,"hopT":5,"fromStock":0,"fsT":0,"phys":null,"d10":21.94,"t10":1,"d20":70.81,"t20":3,"d30":180.41,"t30":8,"ms":438.33,"tms":14,"hPrimary":1.0,"hSecondary":14.0,"hExc":8.3,"hJcb":5.1,"dCamper":26,"dJcb":101,"dExc":178,"rPrimary":"The primary section was not running well during both shift due to boulder availability.","rSecondary":"The secondary section was running well during both shift. BC-6 return belt damaged in day shift.","date":"2026-10-05"},"2026-10-06":{"recv":1025.1,"recvT":45,"hopper":542.1,"hopT":24,"fromStock":0,"fsT":0,"phys":642,"d10":122.46,"t10":5,"d20":85.66,"t20":3,"d30":105.2,"t30":4,"ms":322.54,"tms":9,"hPrimary":6.0,"hSecondary":13.0,"hExc":9.0,"hJcb":3.3,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"The primary section was running low during both shifts due to boulder not being available, and the BC-2 belt was damaged.","rSecondary":"The secondary section was running well during both shifts. During the night shift, it stopped early due to no material in the tunnel.","date":"2026-10-06"},"2026-10-07":{"recv":618.14,"recvT":26,"hopper":570.14,"hopT":22,"fromStock":0,"fsT":0,"phys":null,"d10":61.24,"t10":3,"d20":185.07,"t20":7,"d30":141.26,"t30":5,"ms":306.84,"tms":10,"hPrimary":5.5,"hSecondary":0,"hExc":7.7,"hJcb":2.7,"dCamper":0,"dJcb":0,"dExc":254,"rPrimary":"The primary section was running low during both shift due to boulder not available, and jaw plate change.","rSecondary":"The secondary section was not running well during both shift due to Tunnel material nil. (Secondary hours N.A. \u2013 meter fault.)","date":"2026-10-07"},"2026-10-08":{"recv":1123.35,"recvT":47,"hopper":1075.35,"hopT":45,"fromStock":0,"fsT":0,"phys":null,"d10":0,"t10":0,"d20":173.01,"t20":7,"d30":206.8,"t30":9,"ms":187.15,"tms":6,"hPrimary":11.0,"hSecondary":16.0,"hExc":5.6,"hJcb":2.6,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"The primary section was running well during both shifts as boulder was available.","rSecondary":"The secondary section was running well during both shifts.","date":"2026-10-08"},"2026-10-09":{"recv":618.15,"recvT":27,"hopper":526.15,"hopT":23,"fromStock":80,"fsT":4,"phys":null,"d10":19.74,"t10":1,"d20":147.14,"t20":6,"d30":104.23,"t30":3,"ms":406.05,"tms":12,"hPrimary":6.0,"hSecondary":8.0,"hExc":8.2,"hJcb":1.8,"dCamper":42,"dJcb":0,"dExc":164,"rPrimary":"The primary section was running low due to boulder not being available during the night shift.","rSecondary":"The secondary section was not running during the day shift because the pro-wash plant water-source motor was damaged. It ran well only during the night shift.","date":"2026-10-09"},"2026-10-10":{"recv":219.31,"recvT":9,"hopper":194.31,"hopT":8,"fromStock":380,"fsT":19,"phys":null,"d10":106.99,"t10":4,"d20":0,"t20":0,"d30":290.23,"t30":10,"ms":286.45,"tms":9,"hPrimary":11.0,"hSecondary":12.0,"hExc":9.5,"hJcb":1.2,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"The primary section was running low due to boulder not available from mine's, only running from stock boulder during both shift.","rSecondary":"The secondary section was running well during both shift after maintenance.","date":"2026-10-10"},"2026-10-11":{"recv":639.72,"recvT":26,"hopper":489.72,"hopT":20,"fromStock":220,"fsT":11,"phys":null,"d10":47.18,"t10":2,"d20":265.69,"t20":11,"d30":179.63,"t30":6,"ms":135.33,"tms":5,"hPrimary":7.5,"hSecondary":6.0,"hExc":6.1,"hJcb":2.1,"dCamper":0,"dJcb":60,"dExc":246,"rPrimary":"The primary section was running low due to boulder not available from mine's properly during both shift. Running from stock boulder too.","rSecondary":"The secondary section was running very low during both shift due to boulder not available on Tunnel feeder.","date":"2026-10-11"},"2026-10-12":{"recv":714.04,"recvT":31,"hopper":645.04,"hopT":28,"fromStock":100,"fsT":5,"phys":null,"d10":0,"t10":0,"d20":180.3,"t20":6,"d30":119.82,"t30":3,"ms":525.67,"tms":20,"hPrimary":7.0,"hSecondary":11.0,"hExc":4.5,"hJcb":2.6,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"The primary section was running low due to boulder not available from mine properly during both shifts. Running from stock boulder too. BC 1 jammed issue after maintenance.","rSecondary":"The secondary section was running very low during day shift due to boulder not available on Tunnel feeder. Running well during night shift.","date":"2026-10-12"},"2026-10-13":{"recv":1128.43,"recvT":49,"hopper":1013.43,"hopT":44,"fromStock":20,"fsT":1,"phys":null,"d10":48.53,"t10":2,"d20":207.0,"t20":7,"d30":198.09,"t30":6,"ms":206.78,"tms":8,"hPrimary":10.0,"hSecondary":10.0,"hExc":1.9,"hJcb":1.1,"dCamper":46,"dJcb":0,"dExc":58,"rPrimary":"The primary section was running well during both shifts as boulder was available. Running from stock boulder too. BC 1 jammed issue after maintenance.","rSecondary":"The secondary section was running low during day shift due to boulder not being available on the Tunnel feeder. Running well during night shift. (Hyundai & JCB running very low due to breakdown.)","date":"2026-10-13"},"2026-10-14":{"recv":0,"recvT":0,"hopper":0,"hopT":0,"fromStock":440,"fsT":22,"phys":50,"d10":69.86,"t10":3,"d20":409.44,"t20":17,"d30":75.5,"t30":2,"ms":432.0,"tms":14,"hPrimary":5.0,"hSecondary":12.0,"hExc":8.8,"hJcb":1.9,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"The primary section was running from stock boulder only because boulder was not available from the mines.","rSecondary":"The secondary section was running well during day shift. Night shift was not running well due to no material in the tunnel feeder. (JCB running very low due to breakdown.)","date":"2026-10-14"},"2026-10-15":{"recv":42.91,"recvT":2,"hopper":0,"hopT":0,"fromStock":300,"fsT":15,"phys":62,"d10":71.37,"t10":3,"d20":85.86,"t20":3,"d30":359.45,"t30":13,"ms":232.44,"tms":9,"hPrimary":0.0,"hSecondary":6.5,"hExc":7.1,"hJcb":3.2,"dCamper":31,"dJcb":107,"dExc":300,"rPrimary":"The primary section was running from stock boulder only because boulder was not available from the mines.","rSecondary":"The secondary section was running only during night shift. Day shift was not running due to no material in the tunnel feeder.","date":"2026-10-15"},"2026-10-16":{"recv":362.42,"recvT":15,"hopper":314.42,"hopT":13,"fromStock":60,"fsT":3,"phys":null,"d10":64.27,"t10":3,"d20":73.34,"t20":2,"d30":0,"t30":0,"ms":152.77,"tms":5,"hPrimary":3.5,"hSecondary":1.0,"hExc":3.1,"hJcb":4.4,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"The primary section was running very low due to boulder not available from mine's.","rSecondary":"Secondary plant was not running during day shift due to material not available on Tunnel feeder, and night shift was not running due to pro-wash plant returning pipe jammed.","date":"2026-10-16"},"2026-10-17":{"recv":0,"recvT":0,"hopper":0,"hopT":0,"fromStock":0,"fsT":0,"phys":null,"d10":0,"t10":0,"d20":0,"t20":0,"d30":128.1,"t30":5,"ms":22.16,"tms":1,"hPrimary":0.0,"hSecondary":0.0,"hExc":3.6,"hJcb":0.8,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"The primary section was not running during both shifts due to boulder not available from mine's. Stock boulder nil also.","rSecondary":"Secondary plant was not running during both shifts due to HP cone mantle change operational work.","date":"2026-10-17"},"2026-10-18":{"recv":68.25,"recvT":3,"hopper":68.25,"hopT":3,"fromStock":0,"fsT":0,"phys":null,"d10":0,"t10":0,"d20":0,"t20":0,"d30":73.54,"t30":3,"ms":80.86,"tms":2,"hPrimary":1.0,"hSecondary":5.0,"hExc":4.3,"hJcb":0.0,"dCamper":47,"dJcb":0,"dExc":167,"rPrimary":"The primary section was running very low due to boulder not available from mine's.","rSecondary":"Secondary plant was running very low during both shift due to boulder not available on tunnel feeder and mantle change. (JCB closed.)","date":"2026-10-18"}}};
 const SET_FIELDS = ["startDate","openStock","avg","preparedBy","obRecvMT","obRecvT","obCumMT","obCumT","obAggMT","obAggT","obMsMT","obMsT","obDiesel"];
@@ -473,8 +465,6 @@ function recompute(){
   let noteS = num(S.avg) || 20, noteR = num(S.avg) || 20;
   for (const id of ids){
     const d = days[id];
-    if (d.noteStockAvg !== null && d.noteStockAvg !== undefined && d.noteStockAvg !== "") noteS = num(d.noteStockAvg);
-    if (d.noteRecvAvg !== null && d.noteRecvAvg !== undefined && d.noteRecvAvg !== "") noteR = num(d.noteRecvAvg);
     if (id.slice(0,7) !== month){
       month = id.slice(0,7);
       const isStart = sameMonth(id, S.startDate);
@@ -487,10 +477,15 @@ function recompute(){
     const toStock = recv - hopper, open = prevClose, book = open + toStock - fs;
     const tr = x => Math.round(x/avg);
     const opt = v => (v===null || v===undefined || v==="") ? null : num(v);
-    const recvT = opt(d.recvT) ?? tr(recv), hopperT = opt(d.hopT) ?? tr(hopper), fsT = opt(d.fsT) ?? tr(fs), phys = opt(d.phys);
+    const recvT = opt(d.recvT) ?? 0, hopperT = opt(d.hopT) ?? 0, fsT = opt(d.fsT) ?? 0, phys = opt(d.phys);
+    const stockT = recvT - hopperT;
+    let noteSFrom = "carried", noteRFrom = "carried";
+    if (fsT > 0 && fs > 0) { noteS = Math.round(fs / fsT); noteSFrom = "today"; }
+    if (stockT > 0 && toStock > 0) { noteR = Math.round(toStock / stockT); noteRFrom = "stock"; }
+    else if (recvT > 0 && recv > 0) { noteR = Math.round(recv / recvT); noteRFrom = "received"; }
     const close = phys ?? book;
     const c = {id, open, recv, recvT, hopper, hopperT, toStock, toStockT:recvT-hopperT, fs, fsT,
-      crush: hopper+fs, close, book, physUsed: phys!==null, noteS, noteR};
+      crush: hopper+fs, close, book, physUsed: phys!==null, noteS, noteR, noteSFrom, noteRFrom};
     c.crushT = c.hopperT + c.fsT;
     mRecv += recv; mRecvT += c.recvT; cum += recv; cumT += c.recvT;
     Object.assign(c,{mRecv, mRecvT, cum, cumT});
@@ -532,15 +527,14 @@ function readForm(){
   const o = {};
   for (const f of NUM_FIELDS){ const v=$(f).value.trim(); o[f] = v===""? "" : num(v); }
   for (const f of TEXT_FIELDS) o[f] = $(f).value.trim();
-  for (const f of OPT_FIELDS){ const v=$(f).value.trim(); o[f] = v===""? null : num(v); }
+  for (const f of OPT_FIELDS){ if (!$(f)) { o[f] = days[selected] ? (days[selected][f] ?? null) : null; continue; } const v=$(f).value.trim(); o[f] = v===""? null : num(v); }
   return o;
 }
 function fillForm(d){
   for (const f of NUM_FIELDS) $(f).value = d && d[f]!=="" && d[f]!=null && Number(d[f])!==0 ? d[f] : "";
   for (const f of TEXT_FIELDS) $(f).value = d ? (d[f]||"") : "";
   let anyOpt = false;
-  for (const f of OPT_FIELDS){ const v = d ? d[f] : null; $(f).value = (v===null||v===undefined||v==="") ? "" : v; if ($(f).value!=="" && f === "phys") anyOpt = true; }
-  $("optBox").open = anyOpt;
+  for (const f of OPT_FIELDS){ if (!$(f)) continue; const v = d ? d[f] : null; $(f).value = (v===null||v===undefined||v==="") ? "" : v; }
   dirty = false; updateDayState(); renderCalcs();
 }
 function draftKey(id){ return "plantlog-draft-"+id; }
@@ -554,18 +548,21 @@ function renderCalcs(){
   const f = readForm(), c = previewRow(selected, f);
   const neg = c.close < -0.0005, over = c.toStock < -0.0005;
   lastPreview = c;
-  $("recvT").placeholder = p2(c.recvT); $("hopT").placeholder = p2(c.hopperT); $("fsT").placeholder = p2(c.fsT);
-  $("noteStockAvg").placeholder = String(+c.noteS.toFixed(2)); $("noteRecvAvg").placeholder = c.noteR.toFixed(1);
+  const a1 = String(Math.round(c.noteS)), a2 = Math.round(c.noteR).toFixed(1);
+  const n1 = c.noteSFrom === "today" ? `${f3(c.fs)} MT ÷ ${c.fsT} trips = ${(c.fs/c.fsT).toFixed(2)}, rounded` : "no from-stock trips today: previous value";
+  const n2 = c.noteRFrom === "stock" ? `${f3(c.toStock)} MT ÷ ${c.toStockT} trips = ${(c.toStock/c.toStockT).toFixed(2)}, rounded` : c.noteRFrom === "received" ? `${f3(c.recv)} MT ÷ ${c.recvT} trips = ${(c.recv/c.recvT).toFixed(2)}, rounded (nothing to stock)` : "no trips today: previous value";
+  $("calcNotes").innerHTML = `
+    <div class="row"><span>Note 1 · avg from stock</span><b>${a1} MT / vehicle</b></div><div class="row"><span class="t" style="margin:0">${n1}</span></div>
+    <div class="row total"><span>Note 2 · today's avg at stock</span><b>${a2} MT / vehicle</b></div><div class="row"><span class="t" style="margin:0">${n2}</span></div>`;
   $("calc1").innerHTML = `
     <div class="row"><span>Opening stock <span class="t">yesterday's closing</span></span><b>${f3(c.open)} MT</b></div>
     <div class="row"><span>+ Went to stock</span><b>${f3(c.toStock)} MT<span class="t">${p2(c.toStockT)} trips</span></b></div>
     <div class="row"><span>− Crushed from stock</span><b>${f3(c.fs)} MT<span class="t">${p2(c.fsT)} trips</span></b></div>
-    <div class="row total"><span>Closing stock${c.physUsed?' <span class="t">physical</span>':''}</span><b style="color:${neg?"var(--bad)":"inherit"}">${f3(c.close)} MT</b></div>
-    ${c.physUsed?`<div class="row"><span>Book stock <span class="t">calculated</span></span><b>${f3(c.book)} MT<span class="t">diff ${f3(c.close-c.book)}</span></b></div>`:""}
+    <div class="row total"><span>Closing stock${c.physUsed?' <span class="t">as per report</span>':''}</span><b style="color:${neg?"var(--bad)":"inherit"}">${f3(c.close)} MT</b></div>
+    ${c.physUsed?`<div class="row"><span>Calculated stock</span><b>${f3(c.book)} MT<span class="t">diff ${f3(c.close-c.book)}</span></b></div>`:""}
     <div class="row"><span>Total crushing today</span><b>${f3(c.crush)} MT<span class="t">${p2(c.crushT)} trips</span></b></div>
-    <div class="row"><span>Trips</span><b>Received ${p2(c.recvT)} · Hopper ${p2(c.hopperT)}</b></div>
     ${over?'<div class="warnline">Hopper is more than received. Check the numbers.</div>':""}
-    ${neg?'<div class="warnline">Stock is below zero: more crushed from stock than the book shows. Enter the real stock under "Optional".</div>':""}`;
+    ${neg?'<div class="warnline">Stock is below zero: more crushed from stock than was there. Check today\'s and earlier days\' trips and MT.</div>':""}`;
   $("calc2").innerHTML = `
     <div class="row"><span>Total aggregate (10+20+30 MM)</span><b>${f3(c.agg)} MT<span class="t">${p2(c.aggT)} trips</span></b></div>
     <div class="row total"><span>Total dispatch – all material</span><b>${f3(c.all)} MT<span class="t">${p2(c.allT)} trips</span></b></div>
@@ -575,7 +572,9 @@ function renderCalcs(){
   $("calc4").innerHTML = hw;
   const ftrip = (k) => f[k] !== null && f[k] !== "" && f[k] !== undefined;
   $("calc1").insertAdjacentHTML("beforeend",
-    tripCheck("Received", c.recv, c.recvT, ftrip("recvT")) + tripCheck("Hopper", c.hopper, c.hopperT, ftrip("hopT")) + tripCheck("From stock", c.fs, c.fsT, ftrip("fsT")));
+    [["Received", c.recv, c.recvT], ["Hopper", c.hopper, c.hopperT], ["From stock", c.fs, c.fsT]].map(([l, mt, tr]) =>
+      mt > 0 && !tr ? `<div class="warnline soft">${l}: MT entered but no trips.</div>` : tripCheck(l, mt, tr, true)).join("") +
+    (c.toStockT < 0 ? `<div class="warnline">Hopper trips are more than received trips.</div>` : ""));
   $("calc2").insertAdjacentHTML("beforeend", MATERIALS.map(([m,t,l]) => {
       const mt = num(f[m]), tr = num(f[t]);
       if (mt && !tr) return `<div class="warnline soft">${l}: MT entered but no trips.</div>`;
@@ -633,7 +632,7 @@ function reportHTML(id){
     <tr><td>Stock Boulder Up to Date</td><td class="n">${f3(c.close)} MT Approx.</td><td class="n" style="font-size:10px;font-weight:600">– (daily updated)</td></tr>
     <tr><td>Boulder Crushing from Stock</td><td class="n">${f3(c.fs)} MT</td><td class="n">${p2(c.fsT)}</td></tr>
     <tr class="tot"><td>Total Boulder Crushing Today</td><td class="n">${f3(c.crush)} MT</td><td class="n">${p2(c.crushT)}</td></tr></table>
-    <div class="note">Note: • Boulder crushing from stock is based on an average of ${+c.noteS.toFixed(2)} MT per vehicle.<br>• Boulder received at crusher stock is based on today's average of ${c.noteR.toFixed(1)} MT per vehicle.</div>
+    <div class="note">Note: • Boulder crushing from stock is based on an average of ${Math.round(c.noteS)} MT per vehicle.<br>• Boulder received at crusher stock is based on today's average of ${Math.round(c.noteR).toFixed(1)} MT per vehicle.</div>
     <table><tr><td>Boulder Received at Crusher – This Month</td><td class="n">${f3(c.mRecv)} MT</td><td class="n">${c.mRecvT} Trips</td></tr>
     <tr><td>Total Cumulative Production Up to Date</td><td class="n">${f3(c.cum)} MT</td><td class="n">${c.cumT} Trips</td></tr></table></div>`;
   const b2 = `<div class="blk k2">${H("truck","k2","2. Today's dispatch","#C4261D")}<table>
@@ -889,11 +888,6 @@ function boot(){
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(e){}
   const ids = Object.keys(days).sort();
   if (!days[selected] && ids.length && !loadDraft(selected)) { selected = ids[ids.length-1]; $("date").value = selected; }
-  let filled = false;
-  for (const [id, [a, b]] of Object.entries(NOTE_SEED)) {
-    if (days[id] && days[id].noteStockAvg === undefined && days[id].noteRecvAvg === undefined) { days[id].noteStockAvg = a; days[id].noteRecvAvg = b; filled = true; }
-  }
-  if (filled) persist();
   const lb = lastBackupText();
   if (lb.old && ids.length) showBanner(lb.text+" Open <b>Data</b> and tap <b>Backup</b> to keep a safe copy.", true);
   fillSettingsForm(); renderAll(false);
@@ -1071,7 +1065,7 @@ $("entryForm").addEventListener("click", e => {
   const b = e.target.closest("[data-step]");
   if (b) {
     const id = b.dataset.step, inp = $(id);
-    const start = inp.value === "" && AUTO_KEY[id] && lastPreview ? lastPreview[AUTO_KEY[id]] : num(inp.value);
+    const start = num(inp.value);
     inp.value = Math.max(0, Math.round(start + Number(b.dataset.d)));
     dirty = true; updateDayState(); renderCalcs(); saveDraft(); return;
   }
