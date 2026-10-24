@@ -385,7 +385,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
       <button class="btn ghost" id="syncNow">Sync now</button>
     </div></div>
     <div class="card"><h2>Share data (figures only)</h2><div class="body">
-      <p class="small">An Excel file for people outside the plant: one row per day with the same figures as the report image, already worked out. It has <b>no formulas, no settings and no opening balances</b>, so it does not show how the figures are calculated.</p>
+      <p class="small">An Excel file for people outside the plant, in the <b>same layout as the full tracker</b> (Dashboard, charts, daily sheets). Every figure is already worked out: <b>no formulas, no Settings sheet, no notes</b>, so it does not show how the figures are calculated. The Dashboard shows the last day of the period.</p>
       <div class="grid2">
         <div class="field"><label for="shFrom">From</label><div class="inp"><input id="shFrom" type="date" style="padding-right:12px"></div></div>
         <div class="field"><label for="shTo">To</label><div class="inp"><input id="shTo" type="date" style="padding-right:12px"></div></div>
@@ -422,7 +422,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
         <button type="submit" class="btn primary" id="saveSettings">Save settings</button>
       </div>
     </form>
-    <p class="small" style="text-align:center">App version 20 · 24-Oct-2026</p>
+    <p class="small" style="text-align:center">App version 21 · 24-Oct-2026</p>
     <div class="card"><h2>Delete this day</h2><div class="body">
       <p style="margin:0;font-size:13px;color:var(--muted)">Removes the entry for the date shown at the top. Stock and month totals recalculate.</p>
       <button class="btn danger" id="deleteDay">Delete entry for this date</button>
@@ -1190,68 +1190,134 @@ async function exportXlsx(){
   } catch(err){ toast("Could not make the Excel file: " + ((err && err.message) || err)); }
   finally { btn.disabled = false; btn.textContent = old; }
 }
-/* values-only file for sharing: no formulas, settings or opening balances */
-const SHARE_COLS = [
-  ["Date", c => dmy(c.id), 12],
-  ["Boulder received (MT)", c => r3(c.recv)], ["Boulder received (trips)", c => c.recvT],
-  ["Direct to hopper (MT)", c => r3(c.hopper)], ["Direct to hopper (trips)", c => c.hopperT],
-  ["To stock (MT)", c => r3(c.toStock)], ["To stock (trips)", c => c.toStockT],
-  ["Crushed from stock (MT)", c => r3(c.fs)], ["Crushed from stock (trips)", c => c.fsT],
-  ["Total crushing (MT)", c => r3(c.crush)], ["Total crushing (trips)", c => c.crushT],
-  ["Boulder stock up to date (MT)", c => r3(c.close)],
-  ["Received this month (MT)", c => r3(c.mRecv)], ["Received this month (trips)", c => c.mRecvT],
-  ["Cumulative received (MT)", c => r3(c.cum)], ["Cumulative received (trips)", c => c.cumT],
-  ["10 MM (MT)", c => r3(c.d10)], ["10 MM (trips)", c => c.t10],
-  ["20 MM (MT)", c => r3(c.d20)], ["20 MM (trips)", c => c.t20],
-  ["30 MM (MT)", c => r3(c.d30)], ["30 MM (trips)", c => c.t30],
-  ["M-Sand (MT)", c => r3(c.ms)], ["M-Sand (trips)", c => c.tms],
-  ["Total aggregate today (MT)", c => r3(c.agg)], ["Total aggregate today (trips)", c => c.aggT],
-  ["Total dispatch today (MT)", c => r3(c.all)], ["Total dispatch today (trips)", c => c.allT],
-  ["Aggregate this month (MT)", c => r3(c.mAgg)], ["Aggregate this month (trips)", c => c.mAggT],
-  ["M-Sand this month (MT)", c => r3(c.mMs)], ["M-Sand this month (trips)", c => c.mMsT],
-  ["All material this month (MT)", c => r3(c.mAll)], ["All material this month (trips)", c => c.mAllT],
-  ["Primary section (hrs)", c => c.hPrimary], ["Secondary section (hrs)", c => c.hSecondary],
-  ["Hyundai Excavator R230 (hrs)", c => c.hExc], ["JCB UP92T7813 (hrs)", c => c.hJcb], ["Camper MP07ZM6345 (km)", c => c.hCamper],
-  ["Diesel Camper (L)", c => c.dCamper], ["Diesel JCB (L)", c => c.dJcb], ["Diesel Hyundai (L)", c => c.dExc],
-  ["Diesel total today (L)", c => c.dsl], ["Diesel this month (L)", c => c.mDsl],
-  ["Remarks – primary section", c => c.rPrimary, 60], ["Remarks – secondary section", c => c.rSecondary, 60]];
-// columns added up in the TOTAL row (daily figures only, not running totals)
-const SHARE_SUM = new Set(["Boulder received (MT)","Boulder received (trips)","Direct to hopper (MT)","Direct to hopper (trips)","To stock (MT)","To stock (trips)",
-  "Crushed from stock (MT)","Crushed from stock (trips)","Total crushing (MT)","Total crushing (trips)","10 MM (MT)","10 MM (trips)","20 MM (MT)","20 MM (trips)",
-  "30 MM (MT)","30 MM (trips)","M-Sand (MT)","M-Sand (trips)","Total aggregate today (MT)","Total aggregate today (trips)","Total dispatch today (MT)","Total dispatch today (trips)",
-  "Primary section (hrs)","Secondary section (hrs)","Hyundai Excavator R230 (hrs)","JCB UP92T7813 (hrs)","Camper MP07ZM6345 (km)",
-  "Diesel Camper (L)","Diesel JCB (L)","Diesel Hyundai (L)","Diesel total today (L)"]);
-function buildShareXlsx(from, to){
-  const ids = Object.keys(calc).sort().filter(id => id >= from && id <= to);
-  const rows = [["SNEH BUILDCON PVT. LTD. – Crusher plant production & dispatch"],
-    [`Period: ${dmy(ids[0])} to ${dmy(ids[ids.length-1])} · ${ids.length} days` + (settings.preparedBy ? ` · Prepared by: ${settings.preparedBy}` : "")], [],
-    SHARE_COLS.map(c => c[0])];
-  for (const id of ids) rows.push(SHARE_COLS.map(([, f]) => f(calc[id])));
-  rows.push(SHARE_COLS.map(([h], i) => i === 0 ? "TOTAL" : SHARE_SUM.has(h)
-    ? r3(ids.reduce((a, id) => a + num(SHARE_COLS[i][1](calc[id])), 0)) : ""));
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws["!cols"] = SHARE_COLS.map(([h, , w]) => ({wch: w || Math.max(10, Math.min(16, h.length * 0.6 + 4))}));
-  // 3 decimals for MT columns
-  const rng = XLSX.utils.decode_range(ws["!ref"]);
-  SHARE_COLS.forEach(([h], ci) => { if (!/\(MT\)/.test(h)) return;
-    for (let r = 4; r <= rng.e.r; r++){ const cell = ws[XLSX.utils.encode_cell({r, c:ci})]; if (cell && cell.t === "n") cell.z = "0.000"; } });
-  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Daily figures");
-  wb.Props = {Title:"Crusher plant data", Author:"Sneh Buildcon"};
-  const out = XLSX.write(wb, {type:"array", bookType:"xlsx", compression:true});
-  return {ids, blob: new Blob([out], {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})};
+/* Share copy: the same tracker layout (sheets, colours, charts) but every formula replaced by its value.
+   No Settings sheet, no notes, no drop-downs – so the calculation logic is not in the file. */
+async function openTemplate(){
+  const zip = await JSZip.loadAsync(await (await fetch("tracker-template.xlsx")).arrayBuffer());
+  const P = new DOMParser(), S = new XMLSerializer();
+  const wbDoc = P.parseFromString(await zip.file("xl/workbook.xml").async("string"), "application/xml");
+  const relDoc = P.parseFromString(await zip.file("xl/_rels/workbook.xml.rels").async("string"), "application/xml");
+  const rel = {}; for (const r of relDoc.getElementsByTagName("Relationship")) rel[r.getAttribute("Id")] = r;
+  const path = {}, rid = {};
+  for (const sh of wbDoc.getElementsByTagName("sheet")) {
+    const id = sh.getAttribute("r:id") || sh.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships", "id");
+    const t = rel[id].getAttribute("Target"); rid[sh.getAttribute("name")] = id;
+    path[sh.getAttribute("name")] = t.startsWith("/") ? t.slice(1) : "xl/" + t.replace(/^\.\//, "");
+  }
+  return {zip, P, S, wbDoc, relDoc, rel, path, rid};
 }
-function shareXlsx(){
+const r6 = n => Math.round(n * 1e6) / 1e6;
+async function buildShareXlsx(from, to){
+  const ids = Object.keys(calc).sort().filter(id => id >= from && id <= to);
+  if (!ids.length) return {ids, blob:null};
+  if (ids.length > T_LAST - T_FIRST + 1) throw new Error("More than 800 days: choose a shorter period.");
+  const T = await openTemplate(), {zip, P, S} = T, NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+  const DAILY = ["Daily Boulder","Daily Dispatch","Hours & Remarks","Diesel"];
+  const V = {}; const put = (sh, ref, v) => { (V[sh] = V[sh] || {})[ref] = v; };
+  const rowOf = {}; ids.forEach((id, i) => rowOf[excelSerial(id)] = T_FIRST + i);
+  const n0 = v => (v === null || v === undefined || v === "") ? 0 : num(v);
+  ids.forEach((id, i) => {
+    const r = T_FIRST + i, d = days[id], c = calc[id], ser = excelSerial(id);
+    for (const sh of DAILY) put(sh, "A"+r, ser);
+    const B = (col, v) => put("Daily Boulder", col+r, r6(v));
+    B("B", n0(d.recv)); B("C", n0(d.recvT)); B("D", n0(d.hopper)); B("E", n0(d.hopT)); B("F", n0(d.fromStock)); B("G", n0(d.fsT));
+    put("Daily Boulder", "H"+r, c.physUsed ? r6(c.close) : "");
+    B("I", c.open); B("J", c.recvT); B("K", c.hopperT); B("L", c.toStock); B("M", c.toStockT); B("N", c.fsT); B("O", c.crush); B("P", c.crushT);
+    B("Q", c.book); B("R", c.close); B("S", c.close - c.book); B("T", c.mRecv); B("U", c.mRecvT); B("V", c.cum); B("W", c.cumT); B("X", c.noteS); B("Y", c.noteR);
+    const D = (col, v) => put("Daily Dispatch", col+r, r6(v));
+    D("B", c.d10); D("C", c.t10); D("D", c.d20); D("E", c.t20); D("F", c.d30); D("G", c.t30); D("H", c.ms); D("I", c.tms);
+    D("J", c.agg); D("K", c.aggT); D("L", c.all); D("M", c.allT); D("N", c.mAgg); D("O", c.mAggT); D("P", c.mMs); D("Q", c.mMsT); D("R", c.mAll); D("S", c.mAllT);
+    [["B","hPrimary"],["C","hSecondary"],["D","hExc"],["E","hJcb"],["H","hCamper"]].forEach(([col,k]) => put("Hours & Remarks", col+r, r6(c[k])));
+    put("Hours & Remarks", "F"+r, c.rPrimary); put("Hours & Remarks", "G"+r, c.rSecondary);
+    [["B","dCamper"],["C","dJcb"],["D","dExc"],["E","dsl"],["F","mDsl"]].forEach(([col,k]) => put("Diesel", col+r, r6(c[k])));
+  });
+  const lastId = ids[ids.length-1], repSer = excelSerial(lastId), repRow = T_FIRST + ids.length - 1, rc = calc[lastId];
+  const SH = "(?:'([^']+)'|([A-Za-z]+))!\\$([A-Z]+)\\$5:";
+  const look = new RegExp("INDEX\\(" + SH), sumifs = new RegExp("^SUMIFS\\(" + SH + ".*\\$A(\\d+)\\)$");
+  const val = (sh, ref) => { const v = (V[sh] || {})[ref]; return v === undefined ? "" : v; };
+  const desc = ids.slice().reverse();
+  function evalF(sheet, ref, f){
+    const row = Number(ref.replace(/^[A-Z]+/, ""));
+    if (DAILY.includes(sheet)) {
+      if (row < T_FIRST || row > repRow) return "";
+      if (!(ref in (V[sheet] || {}))) throw new Error("No value for " + sheet + "!" + ref);
+      return V[sheet][ref];
+    }
+    let m;
+    if (sheet === "Dashboard") {
+      if (f.startsWith('IF(OR(G2=""')) return repSer;
+      if (f.startsWith('"Note: ')) return `Note: • Boulder crushing from stock is based on an average of ${Math.round(rc.noteS)} MT per vehicle.`;
+      if (f.startsWith('"• Boulder received')) return `• Boulder received at crusher stock is based on today's average of ${Math.round(rc.noteR).toFixed(1)} MT per vehicle.`;
+      if (f.includes("Settings!$B$15")) return "Prepared by: " + (settings.preparedBy || "");
+      if ((m = f.match(look))) return val(m[1] || m[2], m[3] + repRow);
+    }
+    if (sheet === "Chart Data") {
+      if ((m = f.match(/^Dashboard!\$E\$2(?:-(\d+))?$/))) return repSer - Number(m[1] || 0);
+      if ((m = f.match(/^IF\(ISNUMBER\(Dashboard!\$G\$(\d+)\)/))) { const v = val("Dashboard", "G" + m[1]); return typeof v === "number" ? v : 0; }
+      if ((m = f.match(/LARGE\('Daily Boulder'!\$A\$5:\$A\$800,(\d+)\)/))) { const id = desc[Number(m[1]) - 1]; return id ? dmy(id) : ""; }
+      if ((m = f.match(sumifs))) { const r = rowOf[val("Chart Data", "A" + m[4])]; const v = r ? val(m[1] || m[2], m[3] + r) : 0; return typeof v === "number" ? v : 0; }
+    }
+    throw new Error("Unknown formula in " + sheet + "!" + ref);
+  }
+  const setCell = (doc, c, v) => {
+    while (c.firstChild) c.removeChild(c.firstChild);
+    if (typeof v === "number") { c.setAttribute("t", "n"); const ve = doc.createElementNS(NS, "v"); ve.textContent = String(v); c.appendChild(ve); }
+    else if (v) { c.setAttribute("t", "inlineStr"); const is = doc.createElementNS(NS, "is"), te = doc.createElementNS(NS, "t");
+      te.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space", "preserve"); te.textContent = v; is.appendChild(te); c.appendChild(is); }
+    else c.removeAttribute("t");
+  };
+  const fixed = {"Dashboard": {G2: dmy(lastId), G3: ""}};
+  for (const sh of DAILY) fixed[sh] = {A2: `Shared copy – figures only · ${dmy(ids[0])} to ${dmy(lastId)}`};
+  for (const sheet of [...DAILY, "Dashboard", "Chart Data"]) {
+    const file = T.path[sheet], doc = P.parseFromString(await zip.file(file).async("string"), "application/xml");
+    for (const c of [...doc.getElementsByTagName("c")]) {
+      const ref = c.getAttribute("r"), fe = c.getElementsByTagName("f")[0];
+      let v;
+      if (fixed[sheet] && ref in fixed[sheet]) v = fixed[sheet][ref];
+      else if (fe) v = evalF(sheet, ref, fe.textContent);
+      else if (V[sheet] && ref in V[sheet]) v = V[sheet][ref];
+      else continue;
+      setCell(doc, c, v); put(sheet, ref, v);
+    }
+    // no drop-downs, no cell notes
+    for (const tag of ["dataValidations", "legacyDrawing"]) for (const e of [...doc.getElementsByTagName(tag)]) e.remove();
+    zip.file(file, S.serializeToString(doc));
+    const relFile = file.replace("worksheets/", "worksheets/_rels/") + ".rels";
+    if (zip.file(relFile)) {
+      const rd = P.parseFromString(await zip.file(relFile).async("string"), "application/xml");
+      for (const r of [...rd.getElementsByTagName("Relationship")]) if (/\/(comments|vmlDrawing)$/.test(r.getAttribute("Type"))) r.remove();
+      zip.file(relFile, S.serializeToString(rd));
+    }
+  }
+  // drop the Settings sheet (start stock, opening balances, average) and all notes
+  const setId = T.rid["Settings"];
+  for (const e of [...T.wbDoc.getElementsByTagName("sheet")]) if (e.getAttribute("name") === "Settings") e.remove();
+  for (const e of [...T.wbDoc.getElementsByTagName("calcPr")]) e.removeAttribute("fullCalcOnLoad");
+  zip.file("xl/workbook.xml", S.serializeToString(T.wbDoc));
+  T.rel[setId].remove(); zip.file("xl/_rels/workbook.xml.rels", S.serializeToString(T.relDoc));
+  zip.remove(T.path["Settings"]);
+  for (const n of Object.keys(zip.files)) if (/^xl\/(comments\/|drawings\/commentsDrawing)/.test(n)) zip.remove(n);
+  const ctDoc = P.parseFromString(await zip.file("[Content_Types].xml").async("string"), "application/xml");
+  for (const o of [...ctDoc.getElementsByTagName("Override")]) { const pn = o.getAttribute("PartName").replace(/^\//, "");
+    if (pn === T.path["Settings"] || pn.startsWith("xl/comments/")) o.remove(); }
+  zip.file("[Content_Types].xml", S.serializeToString(ctDoc));
+  const blob = await zip.generateAsync({type:"blob", compression:"DEFLATE", mimeType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  return {ids, blob};
+}
+async function shareXlsx(){
   const all = Object.keys(calc).sort();
   if (!all.length){ toast("No days to share yet"); return; }
-  if (typeof XLSX === "undefined") { toast("Excel is not ready. Open the app once with internet."); return; }
+  if (typeof JSZip === "undefined") { toast("Excel is not ready. Open the app once with internet."); return; }
   let from = $("shFrom").value || all[0], to = $("shTo").value || all[all.length-1];
   if (from > to) [from, to] = [to, from];
+  const btn = $("shareXlsx"); btn.disabled = true; const old = btn.textContent; btn.textContent = "Making share file…";
   try {
-    const {ids, blob} = buildShareXlsx(from, to);
+    const {ids, blob} = await buildShareXlsx(from, to);
     if (!ids.length){ toast("No saved days in that period"); return; }
     openSheet({title:"Share file ready", blob, name:`Sneh-Plant-Data-${dmy(ids[0])}-to-${dmy(ids[ids.length-1])}.xlsx`, image:false,
-      hint:`${ids.length} days, figures only (no formulas or settings). Tap Save, then send it on WhatsApp or e-mail.`});
+      hint:`${ids.length} days in the same layout as the tracker (Dashboard with charts for ${dmy(ids[ids.length-1])}, Daily Boulder, Daily Dispatch, Hours & Remarks, Diesel) – figures only, no formulas or settings. Tap Save, then send it on WhatsApp or e-mail.`});
   } catch(err){ toast("Could not make the file: " + ((err && err.message) || err)); }
+  finally { btn.disabled = false; btn.textContent = old; }
 }
 function fillShareDates(){
   const all = Object.keys(calc).sort(); if (!all.length) return;
