@@ -141,35 +141,46 @@ nav.tabs button[aria-selected=true] svg{color:var(--accent)}
 .paperwrap{overflow:hidden;border-radius:var(--radius);border:1px solid var(--line);background:#fff;position:relative}
 .paperwrap .paper{transform-origin:top left;position:absolute;left:0;top:0}
 .capture{position:fixed;left:-10000px;top:0}
-.paper{--navy:#1B2F6B;--p-ink:#111;--p-line:#B9C2CF;
-  width:900px;background:#fff;color:var(--p-ink);padding:22px 20px 16px;font-family:var(--body);font-size:14.5px;line-height:1.3}
-.paper .ph{text-align:center;display:grid;gap:4px;margin-bottom:12px}
-.paper .ph .co{font-family:var(--display);font-weight:800;font-size:46px;color:var(--navy);letter-spacing:.01em;line-height:1}
-.paper .ph .dt{justify-self:center;background:#E8F0FF;border:2px solid var(--navy);border-radius:99px;padding:3px 22px;font-family:var(--display);font-weight:800;font-size:30px;color:var(--navy)}
-.paper .ph .dt span{color:#C98A00}
-.paper .ph .tt{font-family:var(--display);font-weight:800;font-size:29px;color:var(--navy)}
-.paper .ph .tg{font-weight:700;font-size:14px;color:#333;letter-spacing:.04em}
-.paper .cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
-.paper .blk{border:2px solid var(--bc);border-radius:10px;overflow:hidden;background:#fff}
-.paper .blk h3{margin:0;background:var(--bc);color:#fff;font-family:var(--display);font-weight:800;font-size:22px;padding:5px 10px;letter-spacing:.02em;text-transform:uppercase}
+.paper{--navy:#17306E;--p-ink:#111;--p-line:#C5CCD8;--frame:#1E5AA8;
+  position:relative;width:900px;background:#fff;color:var(--p-ink);padding:18px 18px 14px;font-family:var(--body);font-size:14.5px;line-height:1.3;
+  border:6px solid var(--frame);border-radius:16px;overflow:hidden}
+.paper .corner{position:absolute;width:0;height:0;top:0}
+.paper .corner.l{left:0;border-top:46px solid #F2B705;border-right:46px solid transparent}
+.paper .corner.r{right:0;border-top:46px solid #3E8EDE;border-left:46px solid transparent}
+.paper .ph{display:grid;grid-template-columns:1fr 210px;gap:10px;align-items:center;margin-bottom:12px}
+.paper .ph .txt{display:grid;gap:5px;justify-items:center;text-align:center}
+.paper .ph .co{font-family:var(--display);font-weight:800;font-size:44px;color:var(--navy);letter-spacing:.01em;line-height:1}
+.paper .ph .dt{display:flex;align-items:center;gap:10px;background:linear-gradient(#EAF2FF,#D6E6FF);border:2px solid var(--frame);border-radius:99px;padding:3px 22px 3px 4px;font-family:var(--display);font-weight:800;font-size:28px;color:var(--navy)}
+.paper .ph .dt .cal{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#D7263D}
+.paper .ph .dt span{color:#D99A00}
+.paper .ph .tt{font-family:var(--display);font-weight:800;font-size:24px;white-space:nowrap;color:var(--navy);line-height:1.05}
+.paper .ph .tg{font-weight:700;font-size:13px;color:#1F2A44;letter-spacing:.05em;border-top:2px solid var(--frame);padding-top:4px}
+.paper .ph .tg i{display:inline-block;width:3px;height:13px;background:#D7263D;margin:0 10px;vertical-align:-2px}
+.paper .ph .logo{width:210px;height:146px;object-fit:contain}
+.paper .cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.paper .blk{border:2.5px solid var(--bc);border-radius:14px;overflow:hidden;background:#fff}
+.paper .blk h3{margin:0;display:flex;align-items:center;gap:10px;background:var(--bc);color:#fff;font-family:var(--display);font-weight:800;font-size:20px;padding:5px 12px 5px 6px;white-space:nowrap;letter-spacing:.02em;text-transform:uppercase}
+.paper .blk h3 .ic{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#fff;flex:0 0 auto}
 .paper table{width:100%;border-collapse:collapse}
 .paper th{background:var(--bt);font-weight:700;padding:5px 8px;border:1px solid var(--p-line);font-size:14px}
 .paper td{padding:5px 8px;border:1px solid var(--p-line)}
-.paper td.n{text-align:center;font-weight:600;white-space:nowrap}
+.paper td.n{text-align:center;font-weight:700;white-space:nowrap}
+.paper td.b{font-size:17px}
 .paper tr.tot td{font-weight:800;background:var(--bt)}
 .paper tr.hot td{background:#C4261D;color:#fff;font-weight:800}
-.paper .note{font-size:11.5px;font-style:italic;padding:4px 8px;color:#333}
-.paper .rm{padding:6px 10px;border-top:1px solid var(--p-line)}
-.paper .rm b{display:block;font-size:16px;margin-bottom:2px}
-.paper .big{font-family:var(--display);font-weight:800;font-size:48px;color:var(--navy);text-align:center;padding:10px 6px}
-.paper .prep{text-align:right;margin-top:8px;font-weight:700;color:var(--navy)}
+.paper .note{font-size:11.5px;font-style:italic;padding:4px 8px;color:#333;background:#F4F8FC}
+.paper .rm{margin:8px;padding:8px 10px;border:1px solid #D8CCEA;border-radius:10px;background:#F8F5FC}
+.paper .rm b{display:block;font-size:17px;margin-bottom:2px}
+.paper .prep{text-align:right;margin-top:10px;font-weight:700;color:var(--navy)}
 .paper .prep span{font-family:var(--display);font-size:24px;display:block}
 .paper .k1{--bc:#1E7A3F;--bt:#E3F1E6}.paper .k2{--bc:#C4261D;--bt:#FCE3E1}.paper .k3{--bc:#2457A5;--bt:#E1EBF8}
 .paper .k4{--bc:#E07A1F;--bt:#FCEBDC}.paper .k5{--bc:#6B3FA0;--bt:#ECE5F5}.paper .k6{--bc:#0E8584;--bt:#DDF2F1}
-.paper .mt{margin-top:10px}
-.paper .fuel{display:grid;grid-template-columns:1.3fr 1fr;gap:0}
-.paper .fuel .r{border-left:1px solid var(--p-line);display:grid;align-content:center}
-.paper .fuel .r .l{text-align:center;font-weight:700;padding-top:6px}
+.paper .mt{margin-top:12px}
+.paper .fuel{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:10px;padding:10px;align-items:stretch}
+.paper .fuel .box{border:1px solid #BFE3E1;border-radius:10px;background:#F2FAF9;display:grid;align-content:center;justify-items:center;text-align:center;padding:8px;gap:4px}
+.paper .fuel .box .l{font-weight:700;font-size:14px}
+.paper .fuel .box .v{display:flex;align-items:center;gap:8px;font-family:var(--display);font-weight:800;font-size:38px;color:var(--navy);line-height:1}
+.paper .fuel table{border-radius:10px;overflow:hidden}
 .paper .noentry{padding:40px 16px;text-align:center;color:#555}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .opt{border:1px dashed var(--line);border-radius:var(--radius);padding:0 12px;background:var(--surface-2)}
@@ -561,51 +572,56 @@ function updateDayState(){
 }
 
 /* ---------- report sheet ---------- */
+const PICON = {"truck": "<path d=\"M2.5 6.5h11v9h-11z\"/><path d=\"M13.5 9.5h4l3.5 3.5v2.5h-7.5z\"/><circle cx=\"6.5\" cy=\"17\" r=\"1.9\"/><circle cx=\"17\" cy=\"17\" r=\"1.9\"/>", "bars": "<path d=\"M5 20v-7M10 20V9M15 20V5M20 20v-9\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7v5l3.5 2\"/>", "clip": "<rect x=\"5\" y=\"4.5\" width=\"14\" height=\"16.5\" rx=\"2\"/><path d=\"M9 3.5h6v3H9zM8.5 11h7M8.5 15h7\"/>", "fuel": "<path d=\"M5 21V5.5A2 2 0 0 1 7 3.5h6a2 2 0 0 1 2 2V21M3 21h14\"/><path d=\"M7.5 7h5v4h-5z\"/><path d=\"M15 9.5h2l2 2v6a1.5 1.5 0 0 0 3 0v-8l-3-3\"/>", "cal": "<rect x=\"4\" y=\"5\" width=\"16\" height=\"15\" rx=\"2\"/><path d=\"M4 10h16M9 3v4M15 3v4\"/>"};
+const pico = (k, color, size=22) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${PICON[k]}</svg>`;
 function reportHTML(id){
   const c = calc[id];
-  const head = `<div class="ph"><div class="co">SNEH BUILDCON PVT. LTD.</div>
-    <div class="dt">DATE : <span>${dmy(id)}</span></div>
+  const H = (k, cls, title, color) => `<h3><span class="ic">${pico(k, color)}</span>${title}</h3>`;
+  const head = `<div class="corner l"></div><div class="corner r"></div><div class="ph"><div class="txt">
+    <div class="co">SNEH BUILDCON PVT. LTD.</div>
+    <div class="dt"><span class="cal">${pico("cal", "#ffffff", 24)}</span>DATE : <span>${dmy(id)}</span></div>
     <div class="tt">CRUSHER PLANT PRODUCTION &amp; DISPATCH REPORT</div>
-    <div class="tg">TOGETHER WE BUILD &nbsp;|&nbsp; TOGETHER WE GROW &nbsp;|&nbsp; TOGETHER WE CREATE</div></div>`;
+    <div class="tg">TOGETHER WE BUILD<i></i>TOGETHER WE GROW<i></i>TOGETHER WE CREATE</div></div>
+    <img class="logo" src="logo.png" alt="Sneh Buildcon logo"></div>`;
   if (!c) return head + `<div class="noentry"><b>No entry saved for ${dmy(id)}.</b><br>Open the Entry tab to add this day.</div>`;
   const avg = num(settings.avg)||24;
-  const b1 = `<div class="blk k1"><h3>1. Boulder receipt &amp; crushing</h3><table>
+  const b1 = `<div class="blk k1">${H("truck","k1","1. Boulder receipt &amp; crushing","#1E7A3F")}<table>
     <tr><th>Particular</th><th>Quantity (MT)</th><th>Trips</th></tr>
     <tr><td>Total Boulder Received at Crusher</td><td class="n">${f3(c.recv)}</td><td class="n">${p2(c.recvT)}</td></tr>
     <tr><td>Boulder Received at Crusher Hopper</td><td class="n">${f3(c.hopper)}</td><td class="n">${p2(c.hopperT)}</td></tr>
     <tr><td>Boulder Received at Crusher Stock</td><td class="n">${f3(c.toStock)} MT Approx.</td><td class="n">${p2(c.toStockT)}</td></tr>
-    <tr><td>Stock Boulder Up to Date</td><td class="n">${f3(c.close)} MT Approx.</td><td class="n" style="font-size:10px">– (daily updated)</td></tr>
+    <tr><td>Stock Boulder Up to Date</td><td class="n">${f3(c.close)} MT Approx.</td><td class="n" style="font-size:10px;font-weight:600">– (daily updated)</td></tr>
     <tr><td>Boulder Crushing from Stock</td><td class="n">${f3(c.fs)} MT</td><td class="n">${p2(c.fsT)}</td></tr>
     <tr class="tot"><td>Total Boulder Crushing Today</td><td class="n">${f3(c.crush)} MT</td><td class="n">${p2(c.crushT)}</td></tr></table>
     <div class="note">Note: • Boulder crushing from stock is based on an average of ${avg} MT per vehicle.<br>• Boulder received at crusher stock is based on today's average of ${avg.toFixed(1)} MT per vehicle.</div>
     <table><tr><td>Boulder Received at Crusher – This Month</td><td class="n">${f3(c.mRecv)} MT</td><td class="n">${c.mRecvT} Trips</td></tr>
     <tr><td>Total Cumulative Production Up to Date</td><td class="n">${f3(c.cum)} MT</td><td class="n">${c.cumT} Trips</td></tr></table></div>`;
-  const b2 = `<div class="blk k2"><h3>2. Today's dispatch</h3><table>
+  const b2 = `<div class="blk k2">${H("truck","k2","2. Today's dispatch","#C4261D")}<table>
     <tr><th>Material</th><th>Quantity (MT)</th><th>Trips</th></tr>
-    ${MATERIALS.map(([m,t,l])=>`<tr><td>${l}</td><td class="n" style="font-size:15px">${nil3(c[m])}</td><td class="n" style="font-size:15px">${nil2(c[t])}</td></tr>`).join("")}
-    <tr class="tot"><td>Total Aggregate Dispatch</td><td class="n" style="font-size:15px">${nil3(c.agg)}</td><td class="n" style="font-size:15px">${nil2(c.aggT)}</td></tr>
-    <tr class="hot"><td>Total Dispatch – All Material</td><td class="n" style="font-size:16px">${nil3(c.all)}</td><td class="n" style="font-size:16px">${nil2(c.allT)}</td></tr></table></div>`;
-  const b3 = `<div class="blk k3 mt"><h3>3. Monthly dispatch status</h3><table>
+    ${MATERIALS.map(([m,t,l])=>`<tr><td>${l}</td><td class="n b">${nil3(c[m])}</td><td class="n b">${nil2(c[t])}</td></tr>`).join("")}
+    <tr class="tot"><td>Total Aggregate Dispatch</td><td class="n b">${nil3(c.agg)}</td><td class="n b">${nil2(c.aggT)}</td></tr>
+    <tr class="hot"><td>Total Dispatch – All Material</td><td class="n b" style="font-size:19px">${nil3(c.all)}</td><td class="n b" style="font-size:19px">${nil2(c.allT)}</td></tr></table></div>`;
+  const b3 = `<div class="blk k3 mt">${H("bars","k3","3. Monthly dispatch status","#2457A5")}<table>
     <tr><th>Particular</th><th>Quantity (MT)</th><th>Trips</th></tr>
-    <tr><td>Total Aggregate Dispatch – This Month</td><td class="n" style="font-size:14px">${f3(c.mAgg)}</td><td class="n" style="font-size:14px">${c.mAggT}</td></tr>
-    <tr><td>Total M-Sand Dispatch – This Month</td><td class="n" style="font-size:14px">${f3(c.mMs)}</td><td class="n" style="font-size:14px">${c.mMsT}</td></tr>
-    <tr class="tot"><td>Total Dispatch – All Material This Month</td><td class="n" style="font-size:14px">${f3(c.mAll)}</td><td class="n" style="font-size:14px">${c.mAllT}</td></tr></table></div>`;
-  const b4 = `<div class="blk k4"><h3>4. Plant running hours</h3><table>
+    <tr><td>Total Aggregate Dispatch – This Month</td><td class="n" style="font-size:15px">${f3(c.mAgg)}</td><td class="n" style="font-size:15px">${c.mAggT}</td></tr>
+    <tr><td>Total M-Sand Dispatch – This Month</td><td class="n" style="font-size:15px">${f3(c.mMs)}</td><td class="n" style="font-size:15px">${c.mMsT}</td></tr>
+    <tr class="tot"><td>Total Dispatch – All Material This Month</td><td class="n" style="font-size:15px">${f3(c.mAll)}</td><td class="n" style="font-size:15px">${c.mAllT}</td></tr></table></div>`;
+  const b4 = `<div class="blk k4">${H("clock","k4","4. Plant running hours","#E07A1F")}<table>
     <tr><th>Section / Equipment</th><th>Running Hours</th></tr>
-    <tr><td>Primary Section</td><td class="n" style="font-size:14px">${f1(c.hPrimary)} Hrs approx.</td></tr>
-    <tr><td>Secondary Section</td><td class="n" style="font-size:14px">${f1(c.hSecondary)} Hrs.</td></tr>
-    <tr><td>Hyundai Excavator R230</td><td class="n" style="font-size:14px">${f1(c.hExc)} Hrs.</td></tr>
-    <tr><td>JCB UP92T7813</td><td class="n" style="font-size:14px">${f1(c.hJcb)} Hrs.</td></tr></table></div>`;
-  const b5 = `<div class="blk k5"><h3>5. Remarks</h3>
-    <div class="rm" style="border-top:0"><b>Primary Section :</b>${esc(c.rPrimary)||"–"}</div>
+    <tr><td>Primary Section</td><td class="n" style="font-size:15px">${f1(c.hPrimary)} Hrs approx.</td></tr>
+    <tr><td>Secondary Section</td><td class="n" style="font-size:15px">${f1(c.hSecondary)} Hrs.</td></tr>
+    <tr><td>Hyundai Excavator R230</td><td class="n" style="font-size:15px">${f1(c.hExc)} Hrs.</td></tr>
+    <tr><td>JCB UP92T7813</td><td class="n" style="font-size:15px">${f1(c.hJcb)} Hrs.</td></tr></table></div>`;
+  const b5 = `<div class="blk k5">${H("clip","k5","5. Remarks","#6B3FA0")}
+    <div class="rm"><b>Primary Section :</b>${esc(c.rPrimary)||"–"}</div>
     <div class="rm"><b>Secondary Section :</b>${esc(c.rSecondary)||"–"}</div></div>`;
-  const b6 = `<div class="blk k6 mt"><h3>6. Fuel (diesel)</h3><div class="fuel"><div><table>
-    <tr><th>Equipment / Vehicle</th><th>Diesel Received Today</th></tr>
-    <tr><td>Camper MP07ZM6345</td><td class="n">${fmtInt(c.dCamper)} Ltr</td></tr>
-    <tr><td>JCB UP92T7813</td><td class="n">${fmtInt(c.dJcb)} Ltr</td></tr>
-    <tr><td>Hyundai Excavator R230</td><td class="n">${fmtInt(c.dExc)} Ltr</td></tr>
-    <tr class="tot"><td>Diesel Received Today</td><td class="n" style="font-size:15px">${c.dsl?fmtInt(c.dsl)+" Ltr":"NIL"}</td></tr></table></div>
-    <div class="r"><div class="l">Total Diesel Consumption This Month</div><div class="big">${fmtInt(c.mDsl)} Litres</div></div></div></div>`;
+  const b6 = `<div class="blk k6 mt">${H("fuel","k6","6. Fuel (diesel)","#0E8584")}<div class="fuel">
+    <div class="box"><div class="l">Diesel Received Today:</div><div class="v">${pico("fuel","#0E8584",34)}${c.dsl?fmtInt(c.dsl)+" Ltr":"NIL"}</div></div>
+    <table><tr><th>Equipment / Vehicle</th><th>Diesel Received Today</th></tr>
+      <tr><td>Camper MP07ZM6345</td><td class="n">${fmtInt(c.dCamper)} Ltr</td></tr>
+      <tr><td>JCB UP92T7813</td><td class="n">${fmtInt(c.dJcb)} Ltr</td></tr>
+      <tr><td>Hyundai Excavator R230</td><td class="n">${fmtInt(c.dExc)} Ltr</td></tr></table>
+    <div class="box"><div class="l">Total Diesel Consumption This Month</div><div class="v">${fmtInt(c.mDsl)} Litres</div></div></div></div>`;
   const prep = settings.preparedBy ? `<div class="prep">Prepared by:<span>${esc(settings.preparedBy)}</span></div>` : "";
   return head + `<div class="cols"><div>${b1}</div><div>${b2}${b3}</div></div>
     <div class="cols mt"><div>${b4}</div><div>${b5}</div></div>${b6}${prep}`;
@@ -766,7 +782,7 @@ function renderAll(keepForm){
     fillForm(draft || days[selected] || null);
     if (draft) { dirty = true; updateDayState(); }
   } else { updateDayState(); renderCalcs(); }
-  if (tab==="report") { $("paper").innerHTML = reportHTML(selected); fitPaper(); prepareImage(); }
+  if (tab==="report") { $("paper").innerHTML = reportHTML(selected); fitPaper(); const lg = $("paper").querySelector(".logo"); if (lg && !lg.complete) lg.onload = fitPaper; prepareImage(); }
   if (tab==="charts") { renderCharts(); renderMonth(); }
   if (tab==="data") { renderDayList(); }
   $("copyText").disabled = !calc[selected]; if (tab !== "report") setImgBtn();
@@ -845,8 +861,9 @@ function downloadBlob(blob, name){
 }
 async function makeImage(){
   const holder = document.createElement("div"); holder.className = "capture";
-  const clone = $("paper").cloneNode(true); clone.removeAttribute("id"); clone.style.transform = "none"; clone.style.position = "static";
+  const clone = $("paper").cloneNode(true); clone.removeAttribute("id"); clone.style.transform = "none"; clone.style.position = "relative";
   holder.appendChild(clone); document.body.appendChild(holder);
+  await Promise.all([...clone.querySelectorAll("img")].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
   try { const canvas = await html2canvas(clone, {scale:2, backgroundColor:"#ffffff", width:900, windowWidth:960});
         return await new Promise(r => canvas.toBlob(r, "image/png")); }
   finally { holder.remove(); }
