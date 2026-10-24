@@ -166,6 +166,7 @@ nav.tabs button[aria-selected=true] svg{color:var(--accent)}
 .paper .k1 th:first-child{width:50%}
 .paper .blk{border:2.5px solid var(--bc);border-radius:14px;overflow:hidden;background:#fff}
 .paper .blk h3{margin:0;display:flex;align-items:center;gap:10px;background:var(--bc);color:#fff;font-family:var(--display);font-weight:800;font-size:20px;padding:5px 12px 5px 6px;white-space:nowrap;letter-spacing:.02em;text-transform:uppercase}
+.paper .k4 h3{white-space:normal;font-size:18px;line-height:1.1}
 .paper .blk h3 .ic{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#fff;flex:0 0 auto}
 .paper table{width:100%;border-collapse:collapse}
 .paper th{background:var(--bt);font-weight:700;padding:5px 8px;border:1px solid var(--p-line);font-size:14px}
@@ -283,13 +284,14 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
       </div>
 
       <div class="card c4">
-        <h2><span class="num">4</span>Plant running hours</h2>
+        <h2><span class="num">4</span>Plant and equipment's running hours/km</h2>
         <div class="body">
           <div class="grid2">
             <div class="field"><label for="hPrimary">Primary section</label><div class="inp"><input id="hPrimary" inputmode="decimal" placeholder="0"><span class="u">Hrs</span></div></div>
             <div class="field"><label for="hSecondary">Secondary section</label><div class="inp"><input id="hSecondary" inputmode="decimal" placeholder="0"><span class="u">Hrs</span></div></div>
             <div class="field"><label for="hExc">Hyundai Excavator R230</label><div class="inp"><input id="hExc" inputmode="decimal" placeholder="0"><span class="u">Hrs</span></div></div>
             <div class="field"><label for="hJcb">JCB UP92T7813</label><div class="inp"><input id="hJcb" inputmode="decimal" placeholder="0"><span class="u">Hrs</span></div></div>
+            <div class="field"><label for="hCamper">Camper MP07ZM6345</label><div class="inp"><input id="hCamper" inputmode="decimal" placeholder="0"><span class="u">km</span></div></div>
           </div>
           <div class="warnbox" id="calc4"></div>
           <button type="button" class="linkbtn" id="copyPrev" hidden></button>
@@ -390,7 +392,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
         <button type="submit" class="btn primary" id="saveSettings">Save settings</button>
       </div>
     </form>
-    <p class="small" style="text-align:center">App version 11 · 24-Oct-2026</p>
+    <p class="small" style="text-align:center">App version 12 · 24-Oct-2026</p>
     <div class="card"><h2>Delete this day</h2><div class="body">
       <p style="margin:0;font-size:13px;color:var(--muted)">Removes the entry for the date shown at the top. Stock and month totals recalculate.</p>
       <button class="btn danger" id="deleteDay">Delete entry for this date</button>
@@ -418,7 +420,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
 "use strict";
 const $ = id => document.getElementById(id);
 const MATERIALS = [["d10","t10","10 MM Aggregate"],["d20","t20","20 MM Aggregate"],["d30","t30","30 MM Aggregate"],["ms","tms","M-Sand"]];
-const NUM_FIELDS = ["recv","hopper","fromStock","d10","t10","d20","t20","d30","t30","ms","tms","hPrimary","hSecondary","hExc","hJcb","dCamper","dJcb","dExc"];
+const NUM_FIELDS = ["recv","hopper","fromStock","d10","t10","d20","t20","d30","t30","ms","tms","hPrimary","hSecondary","hExc","hJcb","dCamper","dJcb","dExc","hCamper"];
 const TEXT_FIELDS = ["rPrimary","rSecondary"];
 const OPT_FIELDS = ["recvT","hopT","fsT","phys"];
 const NOTE_SEED = {"2026-10-01": [15, 25.5], "2026-10-02": [20, 25.0], "2026-10-03": [20, 25.0], "2026-10-05": [20, 25.0], "2026-10-06": [20, 23.0], "2026-10-07": [20, 24.0], "2026-10-08": [20, 24.0], "2026-10-09": [20, 23.0], "2026-10-10": [20, 25.0], "2026-10-11": [20, 25.0], "2026-10-12": [20, 23.0], "2026-10-13": [20, 23.0], "2026-10-14": [20, 23.0], "2026-10-15": [20, 23.0], "2026-10-16": [24, 24.0], "2026-10-18": [20, 24.0]};
@@ -449,6 +451,7 @@ const f1 = n => (Math.round(n*10)/10).toFixed(1);
 const p2 = n => String(Math.round(n)).padStart(2,"0");
 const nil3 = n => r3(n) === 0 ? "NIL" : f3(n);
 const nil2 = n => Math.round(n) === 0 ? "NIL" : p2(n);
+const km = n => (Math.round(n*10)/10).toLocaleString("en-IN", {maximumFractionDigits:1});
 const fmtInt = n => Math.round(n).toLocaleString("en-IN");
 const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const sameMonth = (a,b) => a && b && a.slice(0,7) === b.slice(0,7);
@@ -493,7 +496,7 @@ function recompute(){
     c.agg = c.d10+c.d20+c.d30; c.aggT = c.t10+c.t20+c.t30; c.all = c.agg+c.ms; c.allT = c.aggT+c.tms;
     mAgg += c.agg; mAggT += c.aggT; mMs += c.ms; mMsT += c.tms;
     Object.assign(c,{mAgg, mAggT, mMs, mMsT, mAll:mAgg+mMs, mAllT:mAggT+mMsT});
-    c.hPrimary=num(d.hPrimary); c.hSecondary=num(d.hSecondary); c.hExc=num(d.hExc); c.hJcb=num(d.hJcb);
+    c.hPrimary=num(d.hPrimary); c.hSecondary=num(d.hSecondary); c.hExc=num(d.hExc); c.hJcb=num(d.hJcb); c.hCamper=num(d.hCamper);
     c.rPrimary=d.rPrimary||""; c.rSecondary=d.rSecondary||"";
     c.dCamper=num(d.dCamper); c.dJcb=num(d.dJcb); c.dExc=num(d.dExc); c.dsl=c.dCamper+c.dJcb+c.dExc;
     mDsl += c.dsl; c.mDsl = mDsl;
@@ -645,12 +648,13 @@ function reportHTML(id){
     <tr><td>Total Aggregate Dispatch – This Month</td><td class="n" style="font-size:15px">${f3(c.mAgg)}</td><td class="n" style="font-size:15px">${c.mAggT}</td></tr>
     <tr><td>Total M-Sand Dispatch – This Month</td><td class="n" style="font-size:15px">${f3(c.mMs)}</td><td class="n" style="font-size:15px">${c.mMsT}</td></tr>
     <tr class="tot"><td>Total Dispatch – All Material This Month</td><td class="n" style="font-size:15px">${f3(c.mAll)}</td><td class="n" style="font-size:15px">${c.mAllT}</td></tr></table></div>`;
-  const b4 = `<div class="blk k4">${H("clock","k4","4. Plant running hours","#E07A1F")}<table>
-    <tr><th>Section / Equipment</th><th>Running Hours</th></tr>
+  const b4 = `<div class="blk k4">${H("clock","k4","4. Plant and equipment's running hours/km","#E07A1F")}<table>
+    <tr><th>Section / Equipment</th><th>Running Hours / KM</th></tr>
     <tr><td>Primary Section</td><td class="n" style="font-size:15px">${f1(c.hPrimary)} Hrs approx.</td></tr>
     <tr><td>Secondary Section</td><td class="n" style="font-size:15px">${f1(c.hSecondary)} Hrs.</td></tr>
     <tr><td>Hyundai Excavator R230</td><td class="n" style="font-size:15px">${f1(c.hExc)} Hrs.</td></tr>
-    <tr><td>JCB UP92T7813</td><td class="n" style="font-size:15px">${f1(c.hJcb)} Hrs.</td></tr></table></div>`;
+    <tr><td>JCB UP92T7813</td><td class="n" style="font-size:15px">${f1(c.hJcb)} Hrs.</td></tr>
+    <tr><td>Camper MP07ZM6345</td><td class="n" style="font-size:15px">${km(c.hCamper)} km</td></tr></table></div>`;
   const b5 = `<div class="blk k5">${H("clip","k5","5. Remarks","#6B3FA0")}
     <div class="rm"><b>Primary Section :</b>${esc(c.rPrimary)||"–"}</div>
     <div class="rm"><b>Secondary Section :</b>${esc(c.rSecondary)||"–"}</div></div>`;
@@ -676,7 +680,7 @@ function whatsappText(id){
   L.push(`*2. Dispatch today*`, ...MATERIALS.map(([m,t,l])=>`${l}: ${nil3(c[m])} MT (${nil2(c[t])})`),
     `Total aggregate: ${nil3(c.agg)} MT (${nil2(c.aggT)})`, `Total all material: ${nil3(c.all)} MT (${nil2(c.allT)})`, ``);
   L.push(`*3. This month*`, `Aggregate: ${f3(c.mAgg)} MT (${c.mAggT})`, `M-Sand: ${f3(c.mMs)} MT (${c.mMsT})`, `All material: ${f3(c.mAll)} MT (${c.mAllT})`, ``);
-  L.push(`*4. Running hours*`, `Primary ${f1(c.hPrimary)} · Secondary ${f1(c.hSecondary)} · Hyundai R230 ${f1(c.hExc)} · JCB ${f1(c.hJcb)}`, ``);
+  L.push(`*4. Plant and equipment's running hours/km*`, `Primary ${f1(c.hPrimary)} hrs · Secondary ${f1(c.hSecondary)} hrs · Hyundai R230 ${f1(c.hExc)} hrs · JCB ${f1(c.hJcb)} hrs · Camper ${km(c.hCamper)} km`, ``);
   if (c.rPrimary || c.rSecondary) L.push(`*5. Remarks*`, c.rPrimary?`Primary: ${c.rPrimary}`:"", c.rSecondary?`Secondary: ${c.rSecondary}`:"", ``);
   L.push(`*6. Diesel*`, `Today: ${c.dsl?fmtInt(c.dsl)+" Ltr":"NIL"}`, `This month: ${fmtInt(c.mDsl)} Litres`);
   if (settings.preparedBy) L.push(``, `Prepared by: ${settings.preparedBy}`);
@@ -752,7 +756,7 @@ function monthStats(ym){
   const ids = Object.keys(calc).filter(k => k.startsWith(ym)).sort();
   if (!ids.length) return null;
   const S = {ids, last: calc[ids[ids.length-1]]};
-  const keys = ["recv","recvT","hopper","hopperT","fs","fsT","crush","crushT","d10","t10","d20","t20","d30","t30","ms","tms","agg","aggT","all","allT","hPrimary","hSecondary","hExc","hJcb","dsl"];
+  const keys = ["recv","recvT","hopper","hopperT","fs","fsT","crush","crushT","d10","t10","d20","t20","d30","t30","ms","tms","agg","aggT","all","allT","hPrimary","hSecondary","hExc","hJcb","hCamper","dsl"];
   for (const k of keys) S[k] = ids.reduce((a,id) => a + calc[id][k], 0);
   S.best = ids.reduce((a,id) => calc[id].all > calc[a].all ? id : a, ids[0]);
   return S;
@@ -774,9 +778,9 @@ function renderMonth(){
     row("Total aggregate", f3(S.agg), S.aggT) + row("M-Sand", f3(S.ms), S.tms) + row("Total dispatch", f3(S.all), S.allT, "tot") +
     row("Average per day", f3(S.all/n), (S.allT/n).toFixed(1)) +
     row("Best day", dmy(S.best), f3(calc[S.best].all)+" MT") +
-    `<tr class="h"><td>Running hours</td><td class="n">Total</td><td class="n">Avg/day</td></tr>` +
+    `<tr class="h"><td>Running hours / km</td><td class="n">Total</td><td class="n">Avg/day</td></tr>` +
     row("Primary section", f1(S.hPrimary), f1(S.hPrimary/n)) + row("Secondary section", f1(S.hSecondary), f1(S.hSecondary/n)) +
-    row("Hyundai Excavator R230", f1(S.hExc), f1(S.hExc/n)) + row("JCB UP92T7813", f1(S.hJcb), f1(S.hJcb/n)) +
+    row("Hyundai Excavator R230", f1(S.hExc), f1(S.hExc/n)) + row("JCB UP92T7813", f1(S.hJcb), f1(S.hJcb/n)) + row("Camper MP07ZM6345 (km)", km(S.hCamper), km(S.hCamper/n)) +
     `<tr class="h"><td>Diesel</td><td class="n">Ltr</td><td></td></tr>` +
     row("Received this month", fmtInt(S.last.mDsl), "") +
     `<tr><td colspan="3" class="small">${n} day${n>1?"s":""} entered: ${dmy(S.ids[0])} to ${dmy(S.ids[n-1])}</td></tr>`;
@@ -789,7 +793,7 @@ function monthText(){
     `*Dispatch*`, `10 MM: ${f3(S.d10)} MT (${S.t10})`, `20 MM: ${f3(S.d20)} MT (${S.t20})`, `30 MM: ${f3(S.d30)} MT (${S.t30})`,
     `Total aggregate: ${f3(L.mAgg)} MT (${L.mAggT})`, `M-Sand: ${f3(L.mMs)} MT (${L.mMsT})`, `All material: ${f3(L.mAll)} MT (${L.mAllT})`,
     `Best day: ${dmy(S.best)} – ${f3(calc[S.best].all)} MT`, ``,
-    `*Running hours*`, `Primary ${f1(S.hPrimary)} · Secondary ${f1(S.hSecondary)} · Hyundai ${f1(S.hExc)} · JCB ${f1(S.hJcb)}`, ``,
+    `*Running hours / km*`, `Primary ${f1(S.hPrimary)} hrs · Secondary ${f1(S.hSecondary)} hrs · Hyundai ${f1(S.hExc)} hrs · JCB ${f1(S.hJcb)} hrs · Camper ${km(S.hCamper)} km`, ``,
     `*Diesel this month:* ${fmtInt(L.mDsl)} Litres`].join("\n");
 }
 
@@ -967,7 +971,7 @@ async function exportXlsx(){
     "Total Aggregate MT":r3(c.agg),"Total Aggregate Trips":c.aggT,"Total Dispatch MT":r3(c.all),"Total Dispatch Trips":c.allT,
     "Aggregate This Month MT":r3(c.mAgg),"Aggregate This Month Trips":c.mAggT,"M-Sand This Month MT":r3(c.mMs),"M-Sand This Month Trips":c.mMsT,
     "All Material This Month MT":r3(c.mAll),"All Material This Month Trips":c.mAllT,
-    "Primary Hrs":c.hPrimary,"Secondary Hrs":c.hSecondary,"Hyundai R230 Hrs":c.hExc,"JCB Hrs":c.hJcb,"Remarks Primary":c.rPrimary,"Remarks Secondary":c.rSecondary,
+    "Primary Hrs":c.hPrimary,"Secondary Hrs":c.hSecondary,"Hyundai R230 Hrs":c.hExc,"JCB Hrs":c.hJcb,"Camper KM":c.hCamper,"Remarks Primary":c.rPrimary,"Remarks Secondary":c.rSecondary,
     "Diesel Camper Ltr":c.dCamper,"Diesel JCB Ltr":c.dJcb,"Diesel Hyundai Ltr":c.dExc,"Diesel Today Ltr":c.dsl,"Diesel This Month Ltr":c.mDsl}; });
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.json_to_sheet(rows);
