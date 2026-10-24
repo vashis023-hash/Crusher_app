@@ -384,8 +384,16 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
       <p class="small" id="dbStatus">Checking…</p>
       <button class="btn ghost" id="syncNow">Sync now</button>
     </div></div>
+    <div class="card"><h2>Share data (figures only)</h2><div class="body">
+      <p class="small">An Excel file for people outside the plant: one row per day with the same figures as the report image, already worked out. It has <b>no formulas, no settings and no opening balances</b>, so it does not show how the figures are calculated.</p>
+      <div class="grid2">
+        <div class="field"><label for="shFrom">From</label><div class="inp"><input id="shFrom" type="date" style="padding-right:12px"></div></div>
+        <div class="field"><label for="shTo">To</label><div class="inp"><input id="shTo" type="date" style="padding-right:12px"></div></div>
+      </div>
+      <button class="btn primary" id="shareXlsx" style="margin-top:10px">Make share file (Excel)</button>
+    </div></div>
     <div class="card"><h2>Backup &amp; Excel</h2><div class="body">
-      <p class="small">All data is kept <b>only on this phone</b>. Take a backup every week and send the file to yourself on WhatsApp or Google Drive. The same file opens in Excel.</p>
+      <p class="small">The full tracker <b>with your formulas</b>. Keep it for yourself as a backup; don't share it outside. It can be restored here.</p>
       <div class="btnrow"><button class="btn primary" id="exportXlsx">Export Excel (full tracker) / Backup</button><button class="btn ghost" id="restoreBtn">Restore from backup</button></div>
       <input type="file" id="restoreFile" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
       <button class="btn danger" id="restoreApply" hidden></button>
@@ -414,7 +422,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
         <button type="submit" class="btn primary" id="saveSettings">Save settings</button>
       </div>
     </form>
-    <p class="small" style="text-align:center">App version 19 · 24-Oct-2026</p>
+    <p class="small" style="text-align:center">App version 20 · 24-Oct-2026</p>
     <div class="card"><h2>Delete this day</h2><div class="body">
       <p style="margin:0;font-size:13px;color:var(--muted)">Removes the entry for the date shown at the top. Stock and month totals recalculate.</p>
       <button class="btn danger" id="deleteDay">Delete entry for this date</button>
@@ -881,7 +889,7 @@ function setTab(t){
   document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.tab===t)));
   for (const s of ["entry","report","charts","data"]) $("tab-"+s).hidden = s!==t;
   try{ history.replaceState(null,"","#"+t); }catch(e){}
-  renderAll(true); window.scrollTo(0,0);
+  renderAll(true); if (t === "data") fillShareDates(); window.scrollTo(0,0);
 }
 function setDate(id){
   if (!id) return;
@@ -1182,6 +1190,75 @@ async function exportXlsx(){
   } catch(err){ toast("Could not make the Excel file: " + ((err && err.message) || err)); }
   finally { btn.disabled = false; btn.textContent = old; }
 }
+/* values-only file for sharing: no formulas, settings or opening balances */
+const SHARE_COLS = [
+  ["Date", c => dmy(c.id), 12],
+  ["Boulder received (MT)", c => r3(c.recv)], ["Boulder received (trips)", c => c.recvT],
+  ["Direct to hopper (MT)", c => r3(c.hopper)], ["Direct to hopper (trips)", c => c.hopperT],
+  ["To stock (MT)", c => r3(c.toStock)], ["To stock (trips)", c => c.toStockT],
+  ["Crushed from stock (MT)", c => r3(c.fs)], ["Crushed from stock (trips)", c => c.fsT],
+  ["Total crushing (MT)", c => r3(c.crush)], ["Total crushing (trips)", c => c.crushT],
+  ["Boulder stock up to date (MT)", c => r3(c.close)],
+  ["Received this month (MT)", c => r3(c.mRecv)], ["Received this month (trips)", c => c.mRecvT],
+  ["Cumulative received (MT)", c => r3(c.cum)], ["Cumulative received (trips)", c => c.cumT],
+  ["10 MM (MT)", c => r3(c.d10)], ["10 MM (trips)", c => c.t10],
+  ["20 MM (MT)", c => r3(c.d20)], ["20 MM (trips)", c => c.t20],
+  ["30 MM (MT)", c => r3(c.d30)], ["30 MM (trips)", c => c.t30],
+  ["M-Sand (MT)", c => r3(c.ms)], ["M-Sand (trips)", c => c.tms],
+  ["Total aggregate today (MT)", c => r3(c.agg)], ["Total aggregate today (trips)", c => c.aggT],
+  ["Total dispatch today (MT)", c => r3(c.all)], ["Total dispatch today (trips)", c => c.allT],
+  ["Aggregate this month (MT)", c => r3(c.mAgg)], ["Aggregate this month (trips)", c => c.mAggT],
+  ["M-Sand this month (MT)", c => r3(c.mMs)], ["M-Sand this month (trips)", c => c.mMsT],
+  ["All material this month (MT)", c => r3(c.mAll)], ["All material this month (trips)", c => c.mAllT],
+  ["Primary section (hrs)", c => c.hPrimary], ["Secondary section (hrs)", c => c.hSecondary],
+  ["Hyundai Excavator R230 (hrs)", c => c.hExc], ["JCB UP92T7813 (hrs)", c => c.hJcb], ["Camper MP07ZM6345 (km)", c => c.hCamper],
+  ["Diesel Camper (L)", c => c.dCamper], ["Diesel JCB (L)", c => c.dJcb], ["Diesel Hyundai (L)", c => c.dExc],
+  ["Diesel total today (L)", c => c.dsl], ["Diesel this month (L)", c => c.mDsl],
+  ["Remarks – primary section", c => c.rPrimary, 60], ["Remarks – secondary section", c => c.rSecondary, 60]];
+// columns added up in the TOTAL row (daily figures only, not running totals)
+const SHARE_SUM = new Set(["Boulder received (MT)","Boulder received (trips)","Direct to hopper (MT)","Direct to hopper (trips)","To stock (MT)","To stock (trips)",
+  "Crushed from stock (MT)","Crushed from stock (trips)","Total crushing (MT)","Total crushing (trips)","10 MM (MT)","10 MM (trips)","20 MM (MT)","20 MM (trips)",
+  "30 MM (MT)","30 MM (trips)","M-Sand (MT)","M-Sand (trips)","Total aggregate today (MT)","Total aggregate today (trips)","Total dispatch today (MT)","Total dispatch today (trips)",
+  "Primary section (hrs)","Secondary section (hrs)","Hyundai Excavator R230 (hrs)","JCB UP92T7813 (hrs)","Camper MP07ZM6345 (km)",
+  "Diesel Camper (L)","Diesel JCB (L)","Diesel Hyundai (L)","Diesel total today (L)"]);
+function buildShareXlsx(from, to){
+  const ids = Object.keys(calc).sort().filter(id => id >= from && id <= to);
+  const rows = [["SNEH BUILDCON PVT. LTD. – Crusher plant production & dispatch"],
+    [`Period: ${dmy(ids[0])} to ${dmy(ids[ids.length-1])} · ${ids.length} days` + (settings.preparedBy ? ` · Prepared by: ${settings.preparedBy}` : "")], [],
+    SHARE_COLS.map(c => c[0])];
+  for (const id of ids) rows.push(SHARE_COLS.map(([, f]) => f(calc[id])));
+  rows.push(SHARE_COLS.map(([h], i) => i === 0 ? "TOTAL" : SHARE_SUM.has(h)
+    ? r3(ids.reduce((a, id) => a + num(SHARE_COLS[i][1](calc[id])), 0)) : ""));
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws["!cols"] = SHARE_COLS.map(([h, , w]) => ({wch: w || Math.max(10, Math.min(16, h.length * 0.6 + 4))}));
+  // 3 decimals for MT columns
+  const rng = XLSX.utils.decode_range(ws["!ref"]);
+  SHARE_COLS.forEach(([h], ci) => { if (!/\(MT\)/.test(h)) return;
+    for (let r = 4; r <= rng.e.r; r++){ const cell = ws[XLSX.utils.encode_cell({r, c:ci})]; if (cell && cell.t === "n") cell.z = "0.000"; } });
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Daily figures");
+  wb.Props = {Title:"Crusher plant data", Author:"Sneh Buildcon"};
+  const out = XLSX.write(wb, {type:"array", bookType:"xlsx", compression:true});
+  return {ids, blob: new Blob([out], {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})};
+}
+function shareXlsx(){
+  const all = Object.keys(calc).sort();
+  if (!all.length){ toast("No days to share yet"); return; }
+  if (typeof XLSX === "undefined") { toast("Excel is not ready. Open the app once with internet."); return; }
+  let from = $("shFrom").value || all[0], to = $("shTo").value || all[all.length-1];
+  if (from > to) [from, to] = [to, from];
+  try {
+    const {ids, blob} = buildShareXlsx(from, to);
+    if (!ids.length){ toast("No saved days in that period"); return; }
+    openSheet({title:"Share file ready", blob, name:`Sneh-Plant-Data-${dmy(ids[0])}-to-${dmy(ids[ids.length-1])}.xlsx`, image:false,
+      hint:`${ids.length} days, figures only (no formulas or settings). Tap Save, then send it on WhatsApp or e-mail.`});
+  } catch(err){ toast("Could not make the file: " + ((err && err.message) || err)); }
+}
+function fillShareDates(){
+  const all = Object.keys(calc).sort(); if (!all.length) return;
+  const last = all[all.length-1];
+  if (!$("shTo").value) $("shTo").value = last;
+  if (!$("shFrom").value) $("shFrom").value = all[0];
+}
 let pendingRestore = null;
 async function readBackup(file){
   try {
@@ -1325,6 +1402,7 @@ $("deleteDay").addEventListener("click", deleteDay);
 $("saveImg").addEventListener("click", saveImage);
 $("copyText").addEventListener("click", copyText);
 $("exportXlsx").addEventListener("click", exportXlsx);
+$("shareXlsx").addEventListener("click", shareXlsx);
 $("restoreBtn").addEventListener("click", () => $("restoreFile").click());
 $("restoreFile").addEventListener("change", e => { const f=e.target.files[0]; if (f) readBackup(f); e.target.value=""; });
 $("restoreApply").addEventListener("click", applyRestore);
