@@ -147,17 +147,20 @@ nav.tabs button[aria-selected=true] svg{color:var(--accent)}
 .paper .corner{position:absolute;width:0;height:0;top:0}
 .paper .corner.l{left:0;border-top:46px solid #F2B705;border-right:46px solid transparent}
 .paper .corner.r{right:0;border-top:46px solid #3E8EDE;border-left:46px solid transparent}
-.paper .ph{display:grid;grid-template-columns:210px 1fr;gap:10px;align-items:center;margin-bottom:12px}
+.paper .ph{display:grid;grid-template-columns:160px 1fr 160px;gap:8px;align-items:center;margin-bottom:6px}
+.paper .ph2{display:grid;gap:5px;justify-items:center;text-align:center;margin-bottom:12px}
 .paper .ph .txt{display:grid;gap:5px;justify-items:center;text-align:center}
-.paper .ph .co{font-family:var(--display);font-weight:800;font-size:44px;color:var(--navy);letter-spacing:.01em;line-height:1}
+.paper .ph .co{font-family:var(--display);font-weight:800;font-size:40px;white-space:nowrap;color:var(--navy);letter-spacing:.01em;line-height:1}
 .paper .ph .dt{display:flex;align-items:center;gap:10px;background:linear-gradient(#EAF2FF,#D6E6FF);border:2px solid var(--frame);border-radius:99px;padding:3px 22px 3px 4px;font-family:var(--display);font-weight:800;font-size:28px;color:var(--navy)}
 .paper .ph .dt .cal{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#D7263D}
 .paper .ph .dt span{color:#D99A00}
-.paper .ph .tt{font-family:var(--display);font-weight:800;font-size:24px;white-space:nowrap;color:var(--navy);line-height:1.05}
-.paper .ph .tg{font-weight:700;font-size:13px;color:#1F2A44;letter-spacing:.05em;border-top:2px solid var(--frame);padding-top:4px}
-.paper .ph .tg i{display:inline-block;width:3px;height:13px;background:#D7263D;margin:0 10px;vertical-align:-2px}
-.paper .ph .logo{width:210px;height:146px;object-fit:contain}
+.paper .ph2 .tt{font-family:var(--display);font-weight:800;font-size:24px;white-space:nowrap;color:var(--navy);line-height:1.05}
+.paper .ph2 .tg{font-weight:700;font-size:13px;color:#1F2A44;letter-spacing:.05em;border-top:2px solid var(--frame);padding-top:4px}
+.paper .ph2 .tg i{display:inline-block;width:3px;height:13px;background:#D7263D;margin:0 10px;vertical-align:-2px}
+.paper .ph .logo{width:160px;height:111px;object-fit:contain}
 .paper .cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.paper .cols.top{grid-template-columns:1.06fr .94fr}
+.paper .k1 th:first-child{width:50%}
 .paper .blk{border:2.5px solid var(--bc);border-radius:14px;overflow:hidden;background:#fff}
 .paper .blk h3{margin:0;display:flex;align-items:center;gap:10px;background:var(--bc);color:#fff;font-family:var(--display);font-weight:800;font-size:20px;padding:5px 12px 5px 6px;white-space:nowrap;letter-spacing:.02em;text-transform:uppercase}
 .paper .blk h3 .ic{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#fff;flex:0 0 auto}
@@ -589,9 +592,9 @@ function reportHTML(id){
   const H = (k, cls, title, color) => `<h3><span class="ic">${pico(k, color)}</span>${title}</h3>`;
   const head = `<div class="corner l"></div><div class="corner r"></div><div class="ph"><img class="logo" src="logo.png" alt="Sneh Buildcon logo"><div class="txt">
     <div class="co">SNEH BUILDCON PVT. LTD.</div>
-    <div class="dt"><span class="cal">${pico("cal", "#ffffff", 24)}</span>DATE : <span>${dmy(id)}</span></div>
-    <div class="tt">CRUSHER PLANT PRODUCTION &amp; DISPATCH REPORT</div>
-    <div class="tg">TOGETHER WE BUILD<i></i>TOGETHER WE GROW<i></i>TOGETHER WE CREATE</div></div></div>`;
+    <div class="dt"><span class="cal">${pico("cal", "#ffffff", 24)}</span>DATE : <span>${dmy(id)}</span></div></div><div></div></div>
+    <div class="ph2"><div class="tt">CRUSHER PLANT PRODUCTION &amp; DISPATCH REPORT</div>
+    <div class="tg">TOGETHER WE BUILD<i></i>TOGETHER WE GROW<i></i>TOGETHER WE CREATE</div></div>`;
   if (!c) return head + `<div class="noentry"><b>No entry saved for ${dmy(id)}.</b><br>Open the Entry tab to add this day.</div>`;
   const avg = num(settings.avg)||24;
   const b1 = `<div class="blk k1">${H("truck","k1","1. Boulder receipt &amp; crushing","#1E7A3F")}<table>
@@ -632,7 +635,7 @@ function reportHTML(id){
       <tr><td>Hyundai Excavator R230</td><td class="n">${fmtInt(c.dExc)} Ltr</td></tr></table>
     <div class="box"><div class="l">Total Diesel Consumption This Month</div><div class="v">${fmtInt(c.mDsl)} Litres</div></div></div></div>`;
   const prep = settings.preparedBy ? `<div class="prep">Prepared by:<span>${esc(settings.preparedBy)}</span></div>` : "";
-  return head + `<div class="cols"><div>${b1}</div><div>${b2}${b3}</div></div>
+  return head + `<div class="cols top"><div>${b1}</div><div>${b2}${b3}</div></div>
     <div class="cols mt"><div>${b4}</div><div>${b5}</div></div>${b6}${prep}`;
 }
 function whatsappText(id){
@@ -1054,7 +1057,11 @@ let deferredPrompt = null;
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredPrompt = e; $("installCard").hidden = false; });
 window.addEventListener("appinstalled", () => { $("installCard").hidden = true; toast("Installed. Open it from your home screen."); });
 $("installBtn").addEventListener("click", async () => { if (!deferredPrompt) return; deferredPrompt.prompt(); try { await deferredPrompt.userChoice; } catch(e){} deferredPrompt = null; $("installCard").hidden = true; });
-if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(()=>{}));
+if ("serviceWorker" in navigator) {
+  const hadController = !!navigator.serviceWorker.controller; let reloading = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => { if (hadController && !reloading) { reloading = true; if (dirty) saveDraft(); location.reload(); } });
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").then(r => r.update()).catch(()=>{}));
+}
 $("dayList").addEventListener("click", e => { const b=e.target.closest("[data-open]"); if (b){ setDate(b.dataset.open); setTab("entry"); } });
 document.querySelectorAll("nav.tabs button").forEach(b => b.addEventListener("click", () => setTab(b.dataset.tab)));
 document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
