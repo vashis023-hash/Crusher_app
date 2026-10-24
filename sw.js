@@ -1,7 +1,7 @@
 // Offline cache for Crusher Plant Log. Bump VERSION when files change so phones pick up the update.
-const VERSION = "plantlog-v16";
-const FILES = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "logo.png",
-  "chart.umd.js", "html2canvas.min.js", "xlsx.full.min.js"];
+const VERSION = "plantlog-v17";
+const FILES = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "logo.png", "tracker-template.xlsx",
+  "chart.umd.js", "html2canvas.min.js", "xlsx.full.min.js", "jszip.min.js"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES.map(f => new Request(f, {cache: "reload"})))).then(() => self.skipWaiting()));
 });

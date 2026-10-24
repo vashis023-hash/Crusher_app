@@ -7,6 +7,7 @@
 <script src="chart.umd.js"></script>
 <script src="html2canvas.min.js"></script>
 <script src="xlsx.full.min.js"></script>
+<script src="jszip.min.js"></script>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <style>
 /* Layout: one narrow app column (phone-first), sticky date header, fixed bottom tab bar; report is a fixed "paper" sheet like the plant's WhatsApp poster */
@@ -377,7 +378,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
       <button class="btn primary" id="installBtn">Install app</button></div></div>
     <div class="card"><h2>Backup &amp; Excel</h2><div class="body">
       <p class="small">All data is kept <b>only on this phone</b>. Take a backup every week and send the file to yourself on WhatsApp or Google Drive. The same file opens in Excel.</p>
-      <div class="btnrow"><button class="btn primary" id="exportXlsx">Backup / Export to Excel</button><button class="btn ghost" id="restoreBtn">Restore from backup</button></div>
+      <div class="btnrow"><button class="btn primary" id="exportXlsx">Export Excel (full tracker) / Backup</button><button class="btn ghost" id="restoreBtn">Restore from backup</button></div>
       <input type="file" id="restoreFile" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
       <button class="btn danger" id="restoreApply" hidden></button>
       <p class="small" id="lastBackup"></p>
@@ -405,7 +406,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
         <button type="submit" class="btn primary" id="saveSettings">Save settings</button>
       </div>
     </form>
-    <p class="small" style="text-align:center">App version 16 · 24-Oct-2026</p>
+    <p class="small" style="text-align:center">App version 17 · 24-Oct-2026</p>
     <div class="card"><h2>Delete this day</h2><div class="body">
       <p style="margin:0;font-size:13px;color:var(--muted)">Removes the entry for the date shown at the top. Stock and month totals recalculate.</p>
       <button class="btn danger" id="deleteDay">Delete entry for this date</button>
@@ -973,34 +974,75 @@ async function copyText(){
   }
 }
 const INPUT_COLS = ["date",...NUM_FIELDS.slice(0,3),...OPT_FIELDS,...NUM_FIELDS.slice(3),...TEXT_FIELDS];
+// Settings cells in the tracker workbook (Settings sheet, column B)
+const TRACKER_SETTINGS = {startDate:3, openStock:4, avg:5, obRecvMT:6, obRecvT:7, obCumMT:8, obCumT:9, obAggMT:10, obAggT:11, obMsMT:12, obMsT:13, obDiesel:14, preparedBy:15};
+const T_FIRST = 5, T_LAST = 804;
+const excelSerial = id => { const [y,m,d] = id.split("-").map(Number); return (Date.UTC(y, m-1, d) - Date.UTC(1899, 11, 30)) / 86400000; };
+async function buildTrackerXlsx(){
+  const ids = Object.keys(days).sort();
+  if (ids.length > T_LAST - T_FIRST + 1) throw new Error("More than 800 days: start a new file.");
+  const zip = await JSZip.loadAsync(await (await fetch("tracker-template.xlsx")).arrayBuffer());
+  const P = new DOMParser(), S = new XMLSerializer(), NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+  const wbDoc = P.parseFromString(await zip.file("xl/workbook.xml").async("string"), "application/xml");
+  const relDoc = P.parseFromString(await zip.file("xl/_rels/workbook.xml.rels").async("string"), "application/xml");
+  const rel = {}; for (const r of relDoc.getElementsByTagName("Relationship")) rel[r.getAttribute("Id")] = r.getAttribute("Target");
+  const path = {};
+  for (const sh of wbDoc.getElementsByTagName("sheet")) {
+    const rid = sh.getAttribute("r:id") || sh.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships", "id");
+    const t = rel[rid]; path[sh.getAttribute("name")] = t.startsWith("/") ? t.slice(1) : "xl/" + t.replace(/^\.\//, "");
+  }
+  const W = {"Daily Boulder":[], "Daily Dispatch":[], "Hours & Remarks":[], "Diesel":[], "Settings":[]};
+  const put = (sheet, ref, v) => W[sheet].push([ref, v]);
+  const n0 = v => (v === null || v === undefined || v === "") ? 0 : num(v);
+  ids.forEach((id, i) => {
+    const r = T_FIRST + i, d = days[id], ser = excelSerial(id);
+    for (const sh of ["Daily Boulder","Daily Dispatch","Hours & Remarks","Diesel"]) put(sh, "A"+r, ser);
+    put("Daily Boulder","B"+r, n0(d.recv)); put("Daily Boulder","C"+r, n0(d.recvT)); put("Daily Boulder","D"+r, n0(d.hopper));
+    put("Daily Boulder","E"+r, n0(d.hopT)); put("Daily Boulder","F"+r, n0(d.fromStock)); put("Daily Boulder","G"+r, n0(d.fsT));
+    if (d.phys !== null && d.phys !== undefined && d.phys !== "") put("Daily Boulder","H"+r, num(d.phys));
+    [["B","d10"],["C","t10"],["D","d20"],["E","t20"],["F","d30"],["G","t30"],["H","ms"],["I","tms"]].forEach(([c,k]) => put("Daily Dispatch", c+r, n0(d[k])));
+    [["B","hPrimary"],["C","hSecondary"],["D","hExc"],["E","hJcb"],["H","hCamper"]].forEach(([c,k]) => put("Hours & Remarks", c+r, n0(d[k])));
+    put("Hours & Remarks","F"+r, d.rPrimary || ""); put("Hours & Remarks","G"+r, d.rSecondary || "");
+    [["B","dCamper"],["C","dJcb"],["D","dExc"]].forEach(([c,k]) => put("Diesel", c+r, n0(d[k])));
+  });
+  for (const [k, row] of Object.entries(TRACKER_SETTINGS)) {
+    const v = settings[k];
+    put("Settings", "B"+row, k === "startDate" ? (v ? excelSerial(v) : (ids[0] ? excelSerial(ids[0]) : "")) : k === "preparedBy" ? String(v || "") : num(v));
+  }
+  for (const [sheet, list] of Object.entries(W)) {
+    const file = path[sheet]; const doc = P.parseFromString(await zip.file(file).async("string"), "application/xml");
+    const cells = {}; for (const c of doc.getElementsByTagName("c")) cells[c.getAttribute("r")] = c;
+    for (const [ref, v] of list) {
+      const c = cells[ref]; if (!c) continue;
+      while (c.firstChild) c.removeChild(c.firstChild);
+      if (typeof v === "number") { c.setAttribute("t", "n"); const ve = doc.createElementNS(NS, "v"); ve.textContent = String(v); c.appendChild(ve); }
+      else if (v) { c.setAttribute("t", "inlineStr"); const is = doc.createElementNS(NS, "is"), te = doc.createElementNS(NS, "t");
+        te.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space", "preserve"); te.textContent = v; is.appendChild(te); c.appendChild(is); }
+      else c.removeAttribute("t");
+    }
+    zip.file(file, S.serializeToString(doc));
+  }
+  // formulas recalculate when the file is opened (Excel / Google Sheets)
+  for (const file of Object.values(path)) {
+    const xml = await zip.file(file).async("string");
+    if (xml.includes("<v></v>") || xml.includes("<v/>")) zip.file(file, xml.split("<v></v>").join("").split("<v/>").join(""));
+  }
+  return zip.generateAsync({type:"blob", compression:"DEFLATE", mimeType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+}
 async function exportXlsx(){
-  if (typeof XLSX==="undefined") return;
   const ids = Object.keys(calc).sort();
   if (!ids.length){ toast("No days to export yet"); return; }
-  const rows = ids.map(id => { const c=calc[id]; return {
-    "Date":dmy(id),"Opening Stock MT":r3(c.open),"Received MT":r3(c.recv),"Received Trips":c.recvT,"Hopper MT":r3(c.hopper),"Hopper Trips":c.hopperT,
-    "To Stock MT":r3(c.toStock),"To Stock Trips":c.toStockT,"From Stock MT":r3(c.fs),"From Stock Trips":c.fsT,"Total Crushing MT":r3(c.crush),"Total Crushing Trips":c.crushT,
-    "Note Avg From Stock MT/veh":c.noteS,"Note Avg At Stock MT/veh":c.noteR,"Book Closing MT":r3(c.book),"Closing Stock MT":r3(c.close),"Received This Month MT":r3(c.mRecv),"Received This Month Trips":c.mRecvT,"Cumulative MT":r3(c.cum),"Cumulative Trips":c.cumT,
-    "10MM MT":r3(c.d10),"10MM Trips":c.t10,"20MM MT":r3(c.d20),"20MM Trips":c.t20,"30MM MT":r3(c.d30),"30MM Trips":c.t30,"M-Sand MT":r3(c.ms),"M-Sand Trips":c.tms,
-    "Total Aggregate MT":r3(c.agg),"Total Aggregate Trips":c.aggT,"Total Dispatch MT":r3(c.all),"Total Dispatch Trips":c.allT,
-    "Aggregate This Month MT":r3(c.mAgg),"Aggregate This Month Trips":c.mAggT,"M-Sand This Month MT":r3(c.mMs),"M-Sand This Month Trips":c.mMsT,
-    "All Material This Month MT":r3(c.mAll),"All Material This Month Trips":c.mAllT,
-    "Primary Hrs":c.hPrimary,"Secondary Hrs":c.hSecondary,"Hyundai R230 Hrs":c.hExc,"JCB Hrs":c.hJcb,"Camper KM":c.hCamper,"Remarks Primary":c.rPrimary,"Remarks Secondary":c.rSecondary,
-    "Diesel Camper Ltr":c.dCamper,"Diesel JCB Ltr":c.dJcb,"Diesel Hyundai Ltr":c.dExc,"Diesel Today Ltr":c.dsl,"Diesel This Month Ltr":c.mDsl}; });
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.json_to_sheet(rows);
-  ws["!cols"] = Object.keys(rows[0]).map(k=>({wch:Math.max(10,Math.min(28,k.length+2))}));
-  XLSX.utils.book_append_sheet(wb, ws, "Daily Log");
-  const inputs = Object.keys(days).sort().map(id => { const o={}; for (const k of INPUT_COLS) o[k] = k==="date" ? id : (days[id][k] ?? null); return o; });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(inputs, {header:INPUT_COLS}), "Inputs");
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(SET_FIELDS.map(k=>({Key:k, Value:settings[k]})), {header:["Key","Value"]}), "Settings");
-  const buf = XLSX.write(wb, {bookType:"xlsx", type:"array"});
-  const name = `Crusher-Plant-Log-${dmy(ids[ids.length-1])}.xlsx`;
-  const blob = new Blob([buf], {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-  openSheet({title:"Excel backup ready", blob, name, image:false,
-    hint:`${ids.length} days (${dmy(ids[0])} to ${dmy(ids[ids.length-1])}). Tap Save, then send the file from Downloads to yourself on WhatsApp or Google Drive. It opens in Excel and can be restored here.`,
-    onSaved: () => { try { localStorage.setItem("plantlog-lastBackup", new Date().toISOString()); } catch(e){}
-                     $("lastBackup").textContent = lastBackupText().text; showBanner("", false); } });
+  if (typeof JSZip === "undefined") { toast("Excel export is not ready. Open the app once with internet."); return; }
+  const btn = $("exportXlsx"); btn.disabled = true; const old = btn.textContent; btn.textContent = "Making Excel file…";
+  try {
+    const blob = await buildTrackerXlsx();
+    const name = `Crusher-Plant-Log-${dmy(ids[ids.length-1])}.xlsx`;
+    openSheet({title:"Excel file ready", blob, name, image:false,
+      hint:`${ids.length} days (${dmy(ids[0])} to ${dmy(ids[ids.length-1])}) in the full tracker format: Dashboard with charts, Daily Boulder, Daily Dispatch, Hours & Remarks, Diesel and Settings. Tap Save, then send it from Downloads on WhatsApp or Google Drive. It can also be restored here.`,
+      onSaved: () => { try { localStorage.setItem("plantlog-lastBackup", new Date().toISOString()); } catch(e){}
+                       $("lastBackup").textContent = lastBackupText().text; showBanner("", false); } });
+  } catch(err){ toast("Could not make the Excel file: " + ((err && err.message) || err)); }
+  finally { btn.disabled = false; btn.textContent = old; }
 }
 let pendingRestore = null;
 async function readBackup(file){
@@ -1012,8 +1054,35 @@ async function readBackup(file){
       const t = String(v).trim(); let m;
       if ((m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
       if ((m = t.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/))) return `${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`;
+      if ((m = t.match(/^(\d{1,2})[- ]([A-Za-z]{3})[- ](\d{4})$/)) && MON.indexOf(m[2][0].toUpperCase()+m[2].slice(1,3).toLowerCase()) >= 0)
+        return `${m[3]}-${String(MON.indexOf(m[2][0].toUpperCase()+m[2].slice(1,3).toLowerCase())+1).padStart(2,"0")}-${m[1].padStart(2,"0")}`;
       return "";
     };
+    if (wb.Sheets["Daily Boulder"] && wb.Sheets["Daily Dispatch"]) {
+      const rowsOf = name => wb.Sheets[name] ? XLSX.utils.sheet_to_json(wb.Sheets[name], {header:1, raw:true, defval:null, range:T_FIRST-1}) : [];
+      const cell = (name, ref) => { const s_ = wb.Sheets[name]; return s_ && s_[ref] ? s_[ref].v : null; };
+      const next = {}, blank = id => (next[id] = next[id] || {date:id, recvT:null, hopT:null, fsT:null, phys:null, rPrimary:"", rSecondary:""});
+      const nn = v => (v === null || v === "") ? null : num(v);
+      for (const r of rowsOf("Daily Boulder")) { const id = toIso(r[0]); if (!id) continue; const o = blank(id);
+        o.recv = num(r[1]); o.recvT = nn(r[2]); o.hopper = num(r[3]); o.hopT = nn(r[4]); o.fromStock = num(r[5]); o.fsT = nn(r[6]); o.phys = nn(r[7]); }
+      for (const r of rowsOf("Daily Dispatch")) { const id = toIso(r[0]); if (!id) continue; const o = blank(id);
+        ["d10","t10","d20","t20","d30","t30","ms","tms"].forEach((k, j) => o[k] = num(r[j+1])); }
+      for (const r of rowsOf("Hours & Remarks")) { const id = toIso(r[0]); if (!id) continue; const o = blank(id);
+        o.hPrimary = num(r[1]); o.hSecondary = num(r[2]); o.hExc = num(r[3]); o.hJcb = num(r[4]);
+        o.rPrimary = r[5] ? String(r[5]) : ""; o.rSecondary = r[6] ? String(r[6]) : ""; o.hCamper = num(r[7]); }
+      for (const r of rowsOf("Diesel")) { const id = toIso(r[0]); if (!id) continue; const o = blank(id);
+        o.dCamper = num(r[1]); o.dJcb = num(r[2]); o.dExc = num(r[3]); }
+      for (const o of Object.values(next)) for (const f of NUM_FIELDS) if (o[f] === undefined) o[f] = 0;
+      const ns = {...DEFAULT_SETTINGS};
+      for (const [k, row] of Object.entries(TRACKER_SETTINGS)) { const v = cell("Settings", "B"+row);
+        ns[k] = k === "startDate" ? toIso(v) : k === "preparedBy" ? String(v ?? "") : num(v); }
+      const ids = Object.keys(next).sort();
+      if (!ids.length){ toast("No days found in this file."); return; }
+      pendingRestore = {days:next, settings:ns};
+      const b = $("restoreApply"); b.hidden = false;
+      b.textContent = `Replace this phone's data with ${ids.length} days (${dmy(ids[0])} to ${dmy(ids[ids.length-1])})`;
+      return;
+    }
     const ins = wb.Sheets["Inputs"], st = wb.Sheets["Settings"];
     if (!ins) { toast("This file is not a backup from this app."); return; }
     const rows = XLSX.utils.sheet_to_json(ins, {defval:null}), next = {};
