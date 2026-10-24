@@ -4,9 +4,9 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1F3864">
 <link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
-<script src="lib/chart.umd.js"></script>
-<script src="lib/html2canvas.min.js"></script>
-<script src="lib/xlsx.full.min.js"></script>
+<script src="chart.umd.js"></script>
+<script src="html2canvas.min.js"></script>
+<script src="xlsx.full.min.js"></script>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <style>
 /* Layout: one narrow app column (phone-first), sticky date header, fixed bottom tab bar; report is a fixed "paper" sheet like the plant's WhatsApp poster */
@@ -179,6 +179,11 @@ nav.tabs button[aria-selected=true] svg{color:var(--accent)}
 .opt[open]{padding-bottom:12px}
 .opt .grid3,.opt .field{margin-bottom:10px}
 .small{margin:0;font-size:13px;color:var(--muted)}
+.sheet{position:fixed;inset:0;z-index:60;background:rgb(0 0 0 / .55);display:grid;place-items:end center;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.sheetbox{background:var(--surface);color:var(--ink);border-radius:14px;padding:16px;max-width:640px;width:100%;display:grid;gap:12px;max-height:88vh;overflow:auto}
+.sheetbox h3{margin:0;font-family:var(--display);font-size:20px;text-transform:uppercase;letter-spacing:.03em}
+.sheetbox img{width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+a.btn{display:inline-grid;place-items:center;text-decoration:none}
 .nextcard{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1.5px solid var(--accent);border-radius:var(--radius);padding:10px 12px}
 .nextcard b{font-size:15px}
 .nextcard .btn{height:44px;font-size:15px}
@@ -366,6 +371,13 @@ nav.tabs button[aria-selected=true] svg{color:var(--accent)}
   <button role="tab" data-tab="data" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>Data</button>
 </div></nav>
 <div id="toast" hidden></div>
+<div id="sheet" class="sheet" hidden><div class="sheetbox" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <h3 id="sheetTitle"></h3>
+  <img id="sheetImg" alt="Report image" hidden>
+  <p class="small" id="sheetHint"></p>
+  <a class="btn primary" id="sheetSave" download>Save to phone</a>
+  <div class="btnrow"><button class="btn ghost" id="sheetShare" hidden>Share…</button><button class="btn ghost" id="sheetClose">Close</button></div>
+</div></div>
 
 <script>
 (() => {
@@ -754,10 +766,10 @@ function renderAll(keepForm){
     fillForm(draft || days[selected] || null);
     if (draft) { dirty = true; updateDayState(); }
   } else { updateDayState(); renderCalcs(); }
-  if (tab==="report") { $("paper").innerHTML = reportHTML(selected); fitPaper(); }
+  if (tab==="report") { $("paper").innerHTML = reportHTML(selected); fitPaper(); prepareImage(); }
   if (tab==="charts") { renderCharts(); renderMonth(); }
   if (tab==="data") { renderDayList(); }
-  $("saveImg").disabled = !calc[selected]; $("copyText").disabled = !calc[selected];
+  $("copyText").disabled = !calc[selected]; if (tab !== "report") setImgBtn();
   $("deleteDay").disabled = !days[selected] || !canWrite;
   $("lastBackup").textContent = lastBackupText().text;
 }
@@ -839,19 +851,43 @@ async function makeImage(){
         return await new Promise(r => canvas.toBlob(r, "image/png")); }
   finally { holder.remove(); }
 }
-async function saveImage(){
-  if (!calc[selected]) return;
-  const btn = $("saveImg"); btn.disabled = true; btn.textContent = "Making image…";
+let imgCache = null, imgJob = 0, sheetUrl = null;
+function setImgBtn(text, dis){ const b = $("saveImg"); b.textContent = text || "Share image (WhatsApp)"; b.disabled = !!dis || !calc[selected]; }
+async function prepareImage(){
+  imgCache = null;
+  if (!calc[selected]) { setImgBtn(); return; }
+  const job = ++imgJob, id = selected;
+  setImgBtn("Preparing image…", true);
   try {
-    const blob = await makeImage(), name = `Plant-Report-${dmy(selected)}.png`;
-    const file = new File([blob], name, {type:"image/png"});
-    if (navigator.canShare && navigator.canShare({files:[file]})) {
-      try { await navigator.share({files:[file], title:"Plant Report "+dmy(selected)}); return; }
-      catch(err){ if (err && err.name === "AbortError") return; }
-    }
-    downloadBlob(blob, name); toast("Image saved to Downloads");
-  } catch(err){ toast("Could not make the image."); }
-  finally { btn.disabled=false; btn.textContent="Share image (WhatsApp)"; }
+    await new Promise(r => setTimeout(r, 200)); if (job !== imgJob) return;
+    const blob = await makeImage(); if (job !== imgJob) return;
+    if (!blob) throw new Error("empty image");
+    imgCache = {id, blob, name: `Plant-Report-${dmy(id)}.png`}; setImgBtn();
+  } catch(err){ if (job === imgJob){ setImgBtn(); toast("Could not make the image: " + ((err && err.message) || err)); } }
+}
+function openSheet(o){
+  closeSheet(); sheetUrl = URL.createObjectURL(o.blob);
+  $("sheetTitle").textContent = o.title; $("sheetHint").textContent = o.hint;
+  const img = $("sheetImg"); img.hidden = !o.image; if (o.image) img.src = sheetUrl; else img.removeAttribute("src");
+  const a = $("sheetSave"); a.href = sheetUrl; a.download = o.name; a.textContent = o.image ? "Save image to phone" : "Save Excel file to phone";
+  a.onclick = () => { if (o.onSaved) o.onSaved(); setTimeout(() => toast("Saved. Look in Downloads / Files."), 400); };
+  const file = new File([o.blob], o.name, {type: o.blob.type});
+  const can = !!(navigator.canShare && navigator.canShare({files:[file]}));
+  const sh = $("sheetShare"); sh.hidden = !can;
+  sh.onclick = () => { navigator.share({files:[file]}).catch(() => {}); };
+  $("sheet").hidden = false;
+}
+function closeSheet(){ $("sheet").hidden = true; if (sheetUrl){ URL.revokeObjectURL(sheetUrl); sheetUrl = null; } }
+function saveImage(){
+  // No await before navigator.share: Android only opens the share menu straight after the tap.
+  if (!imgCache || imgCache.id !== selected){ prepareImage(); return; }
+  const {blob, name} = imgCache, file = new File([blob], name, {type:"image/png"});
+  const sheetOpts = {title:"Report image – " + dmy(selected), blob, name, image:true,
+    hint:"Tap Save to keep it on the phone (Downloads / Gallery), then send it on WhatsApp. You can also long-press the picture."};
+  if (navigator.canShare && navigator.canShare({files:[file]})) {
+    navigator.share({files:[file], title:"Plant Report " + dmy(selected)})
+      .catch(err => { if (!err || err.name !== "AbortError") openSheet(sheetOpts); });
+  } else openSheet(sheetOpts);
 }
 async function copyText(){
   const t = whatsappText(selected); if (!t) return;
@@ -886,15 +922,10 @@ async function exportXlsx(){
   const buf = XLSX.write(wb, {bookType:"xlsx", type:"array"});
   const name = `Crusher-Plant-Log-${dmy(ids[ids.length-1])}.xlsx`;
   const blob = new Blob([buf], {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-  const file = new File([blob], name, {type:blob.type});
-  let done = false;
-  if (navigator.canShare && navigator.canShare({files:[file]})) {
-    try { await navigator.share({files:[file], title:"Plant log backup"}); done = true; }
-    catch(err){ if (err && err.name === "AbortError") return; }
-  }
-  if (!done){ downloadBlob(blob, name); toast("Backup saved to Downloads"); }
-  try { localStorage.setItem("plantlog-lastBackup", new Date().toISOString()); } catch(e){}
-  $("lastBackup").textContent = lastBackupText().text; showBanner("", false);
+  openSheet({title:"Excel backup ready", blob, name, image:false,
+    hint:`${ids.length} days (${dmy(ids[0])} to ${dmy(ids[ids.length-1])}). Tap Save, then send the file from Downloads to yourself on WhatsApp or Google Drive. It opens in Excel and can be restored here.`,
+    onSaved: () => { try { localStorage.setItem("plantlog-lastBackup", new Date().toISOString()); } catch(e){}
+                     $("lastBackup").textContent = lastBackupText().text; showBanner("", false); } });
 }
 let pendingRestore = null;
 async function readBackup(file){
@@ -986,6 +1017,8 @@ $("exportXlsx").addEventListener("click", exportXlsx);
 $("restoreBtn").addEventListener("click", () => $("restoreFile").click());
 $("restoreFile").addEventListener("change", e => { const f=e.target.files[0]; if (f) readBackup(f); e.target.value=""; });
 $("restoreApply").addEventListener("click", applyRestore);
+$("sheetClose").addEventListener("click", closeSheet);
+$("sheet").addEventListener("click", e => { if (e.target === $("sheet")) closeSheet(); });
 let deferredPrompt = null;
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredPrompt = e; $("installCard").hidden = false; });
 window.addEventListener("appinstalled", () => { $("installCard").hidden = true; toast("Installed. Open it from your home screen."); });

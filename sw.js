@@ -1,7 +1,7 @@
 // Offline cache for Crusher Plant Log. Bump VERSION when you upload a new index.html so phones pick it up.
-const VERSION = "plantlog-v2";
+const VERSION = "plantlog-v4";
 const FILES = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "icon-maskable-512.png",
-  "lib/chart.umd.js", "lib/html2canvas.min.js", "lib/xlsx.full.min.js"];
+  "chart.umd.js", "html2canvas.min.js", "xlsx.full.min.js"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
 });

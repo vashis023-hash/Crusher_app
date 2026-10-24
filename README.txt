@@ -4,7 +4,7 @@ All data stays on the phone. No account, no monthly cost.
 
 PUT IT ONLINE ONCE (free, ~5 minutes) - GitHub Pages
 1. github.com -> sign in -> New repository -> name: plant-log -> Public -> Create.
-2. "uploading an existing file" -> drag ALL files and the "lib" folder from this zip -> Commit.
+2. Add file -> Upload files -> select ALL 10 files from this zip (no folders) -> Commit changes.
 3. Settings -> Pages -> Source: "Deploy from a branch" -> Branch: main, folder: / (root) -> Save.
 4. After 1-2 minutes your link is: https://<your-github-name>.github.io/plant-log/
 
