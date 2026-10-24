@@ -196,6 +196,10 @@ nav.tabs button[aria-selected=true] svg{color:var(--accent)}
 .opt[open]{padding-bottom:12px}
 .opt .grid3,.opt .field{margin-bottom:10px}
 .small{margin:0;font-size:13px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:-4px}
+.chip{border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:99px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;text-align:left}
+.chip:active{background:var(--line)}
+.stepper input::placeholder{color:var(--muted);opacity:.75}
 .sheet{position:fixed;inset:0;z-index:60;background:rgb(0 0 0 / .55);display:grid;place-items:end center;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
 .sheetbox{background:var(--surface);color:var(--ink);border-radius:14px;padding:16px;max-width:640px;width:100%;display:grid;gap:12px;max-height:88vh;overflow:auto}
 .sheetbox h3{margin:0;font-family:var(--display);font-size:20px;text-transform:uppercase;letter-spacing:.03em}
@@ -244,24 +248,37 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
       <div class="card c1">
         <h2><span class="num">1</span>Boulder receipt &amp; crushing</h2>
         <div class="body">
-          <div class="grid3">
+          <div class="mat-row">
             <div class="field"><label for="recv">Received at crusher</label><div class="inp"><input id="recv" inputmode="decimal" placeholder="0"><span class="u">MT</span></div></div>
+            <div class="field"><label for="recvT">Trips</label><div class="stepper">
+              <button type="button" data-step="recvT" data-d="-1" aria-label="One trip less">−</button>
+              <input id="recvT" inputmode="numeric" placeholder="auto">
+              <button type="button" data-step="recvT" data-d="1" aria-label="One trip more">+</button></div></div>
+          </div>
+          <div class="mat-row">
             <div class="field"><label for="hopper">Direct to hopper</label><div class="inp"><input id="hopper" inputmode="decimal" placeholder="0"><span class="u">MT</span></div></div>
+            <div class="field"><label for="hopT">Trips</label><div class="stepper">
+              <button type="button" data-step="hopT" data-d="-1" aria-label="One trip less">−</button>
+              <input id="hopT" inputmode="numeric" placeholder="auto">
+              <button type="button" data-step="hopT" data-d="1" aria-label="One trip more">+</button></div></div>
+          </div>
+          <div class="chips"><button type="button" class="chip" id="sameAsRecv">Hopper = all received</button></div>
+          <div class="mat-row">
             <div class="field"><label for="fromStock">Crushed from stock</label><div class="inp"><input id="fromStock" inputmode="decimal" placeholder="0"><span class="u">MT</span></div></div>
+            <div class="field"><label for="fsT">Trips</label><div class="stepper">
+              <button type="button" data-step="fsT" data-d="-1" aria-label="One trip less">−</button>
+              <input id="fsT" inputmode="numeric" placeholder="auto">
+              <button type="button" data-step="fsT" data-d="1" aria-label="One trip more">+</button></div></div>
           </div>
+          <p class="small">Trips in grey are worked out from MT. Type or use − / + to enter the counted trips.</p>
           <div class="grid2">
-            <div class="field"><label for="noteStockAvg">Note line 1: avg MT per vehicle (crushing from stock)</label><div class="inp"><input id="noteStockAvg" inputmode="decimal"><span class="u">MT</span></div></div>
-            <div class="field"><label for="noteRecvAvg">Note line 2: today's avg MT per vehicle (received at stock)</label><div class="inp"><input id="noteRecvAvg" inputmode="decimal"><span class="u">MT</span></div></div>
+            <div class="field"><label for="noteStockAvg">Note 1: avg MT / vehicle from stock</label><div class="inp"><input id="noteStockAvg" inputmode="decimal"><span class="u">MT</span></div></div>
+            <div class="field"><label for="noteRecvAvg">Note 2: today's avg MT / vehicle at stock</label><div class="inp"><input id="noteRecvAvg" inputmode="decimal"><span class="u">MT</span></div></div>
           </div>
-          <p class="small" style="margin-top:-4px">Shown in the Note on the report. Leave blank to use the previous day's value.</p>
-          <details class="opt" id="optBox"><summary>Optional: counted trips &amp; physical stock</summary>
-            <div class="grid3">
-              <div class="field"><label for="recvT">Received trips</label><div class="inp"><input id="recvT" inputmode="numeric" placeholder="auto"><span class="u">trips</span></div></div>
-              <div class="field"><label for="hopT">Hopper trips</label><div class="inp"><input id="hopT" inputmode="numeric" placeholder="auto"><span class="u">trips</span></div></div>
-              <div class="field"><label for="fsT">From-stock trips</label><div class="inp"><input id="fsT" inputmode="numeric" placeholder="auto"><span class="u">trips</span></div></div>
-            </div>
-            <div class="field"><label for="phys">Physical closing stock</label><div class="inp"><input id="phys" inputmode="decimal" placeholder="leave blank"><span class="u">MT</span></div>
-              <span class="hint">Only when the real stock differs from the calculated stock. Leave trips blank to calculate them from MT.</span></div>
+          <p class="small" style="margin-top:-4px">Printed in the Note on the report. Blank = previous day's value.</p>
+          <details class="opt" id="optBox"><summary>Correct the stock (only if the calculated stock is wrong)</summary>
+            <div class="field"><label for="phys">Actual boulder stock at end of today</label><div class="inp"><input id="phys" inputmode="decimal" placeholder="leave blank"><span class="u">MT</span></div>
+              <span class="hint">Normally leave blank: the app calculates stock as yesterday's stock + went to stock − crushed from stock. Type a figure only when the real stock on the ground is different (e.g. after measuring the pile). That figure is used from then on.</span></div>
           </details>
           <div class="calc" id="calc1"></div>
         </div>
@@ -290,8 +307,10 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
       <div class="card c5">
         <h2><span class="num">5</span>Remarks</h2>
         <div class="body">
-          <div class="field"><label for="rPrimary">Primary section</label><textarea id="rPrimary" rows="2" placeholder="e.g. Running normal"></textarea></div>
-          <div class="field"><label for="rSecondary">Secondary section</label><textarea id="rSecondary" rows="2" placeholder="e.g. Running normal"></textarea></div>
+          <div class="field"><label for="rPrimary">Primary section</label><textarea id="rPrimary" rows="2" placeholder="Type, or tap a phrase below"></textarea></div>
+          <div class="chips"><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was running well during both shifts as boulder was available.">+ Running well</button><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was running low due to boulder not available from mine&#x27;s.">+ Boulder not available</button><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was running from stock boulder only because boulder was not available from the mines.">+ From stock only</button><button type="button" class="chip" data-remark="rPrimary" data-text="The primary section was not running due to breakdown / maintenance work.">+ Breakdown / maintenance</button></div>
+          <div class="field"><label for="rSecondary">Secondary section</label><textarea id="rSecondary" rows="2" placeholder="Type, or tap a phrase below"></textarea></div>
+          <div class="chips"><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was running well during both shifts.">+ Running well</button><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was running low due to no material in the tunnel feeder.">+ No material in tunnel</button><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was not running properly due to power cut.">+ Power cut</button><button type="button" class="chip" data-remark="rSecondary" data-text="The secondary section was not running due to maintenance work.">+ Maintenance</button></div>
         </div>
       </div>
 
@@ -379,7 +398,7 @@ a.btn{display:inline-grid;place-items:center;text-decoration:none}
         <button type="submit" class="btn primary" id="saveSettings">Save settings</button>
       </div>
     </form>
-    <p class="small" style="text-align:center">App version 9 · 24-Oct-2026</p>
+    <p class="small" style="text-align:center">App version 10 · 24-Oct-2026</p>
     <div class="card"><h2>Delete this day</h2><div class="body">
       <p style="margin:0;font-size:13px;color:var(--muted)">Removes the entry for the date shown at the top. Stock and month totals recalculate.</p>
       <button class="btn danger" id="deleteDay">Delete entry for this date</button>
@@ -520,7 +539,7 @@ function fillForm(d){
   for (const f of NUM_FIELDS) $(f).value = d && d[f]!=="" && d[f]!=null && Number(d[f])!==0 ? d[f] : "";
   for (const f of TEXT_FIELDS) $(f).value = d ? (d[f]||"") : "";
   let anyOpt = false;
-  for (const f of OPT_FIELDS){ const v = d ? d[f] : null; $(f).value = (v===null||v===undefined||v==="") ? "" : v; if ($(f).value!=="" && !f.startsWith("note")) anyOpt = true; }
+  for (const f of OPT_FIELDS){ const v = d ? d[f] : null; $(f).value = (v===null||v===undefined||v==="") ? "" : v; if ($(f).value!=="" && f === "phys") anyOpt = true; }
   $("optBox").open = anyOpt;
   dirty = false; updateDayState(); renderCalcs();
 }
@@ -529,9 +548,13 @@ function saveDraft(){ try{ localStorage.setItem(draftKey(selected), JSON.stringi
 function loadDraft(id){ try{ const s=localStorage.getItem(draftKey(id)); return s?JSON.parse(s):null; }catch(e){ return null; } }
 function clearDraft(id){ try{ localStorage.removeItem(draftKey(id)); }catch(e){} }
 
+let lastPreview = null;
+const AUTO_KEY = {recvT:"recvT", hopT:"hopperT", fsT:"fsT"};
 function renderCalcs(){
   const f = readForm(), c = previewRow(selected, f);
   const neg = c.close < -0.0005, over = c.toStock < -0.0005;
+  lastPreview = c;
+  $("recvT").placeholder = p2(c.recvT); $("hopT").placeholder = p2(c.hopperT); $("fsT").placeholder = p2(c.fsT);
   $("noteStockAvg").placeholder = String(+c.noteS.toFixed(2)); $("noteRecvAvg").placeholder = c.noteR.toFixed(1);
   $("calc1").innerHTML = `
     <div class="row"><span>Opening stock <span class="t">yesterday's closing</span></span><b>${f3(c.open)} MT</b></div>
@@ -834,7 +857,7 @@ function persist(){
 async function saveDay(e){
   e.preventDefault();
   days[selected] = cleanDay(readForm());
-  if (persist()){ clearDraft(selected); dirty=false; renderAll(false); toast("Saved "+dmy(selected)); }
+  if (persist()){ clearDraft(selected); dirty=false; renderAll(false); toast("Saved "+dmy(selected)); try { navigator.vibrate && navigator.vibrate(40); } catch(e){} }
 }
 async function saveSettings(e){
   e.preventDefault();
@@ -1044,11 +1067,35 @@ $("copyMonth").addEventListener("click", async () => {
   catch(e){ toast("Copy isn't allowed here."); }
 });
 $("entryForm").addEventListener("submit", saveDay);
-$("dispatchFields").addEventListener("click", e => {
-  const b = e.target.closest("[data-step]"); if (!b) return;
-  const inp = $(b.dataset.step); inp.value = Math.max(0, Math.round(num(inp.value) + Number(b.dataset.d)));
-  dirty = true; updateDayState(); renderCalcs(); saveDraft();
+$("entryForm").addEventListener("click", e => {
+  const b = e.target.closest("[data-step]");
+  if (b) {
+    const id = b.dataset.step, inp = $(id);
+    const start = inp.value === "" && AUTO_KEY[id] && lastPreview ? lastPreview[AUTO_KEY[id]] : num(inp.value);
+    inp.value = Math.max(0, Math.round(start + Number(b.dataset.d)));
+    dirty = true; updateDayState(); renderCalcs(); saveDraft(); return;
+  }
+  const r = e.target.closest("[data-remark]");
+  if (r) {
+    const ta = $(r.dataset.remark), t = r.dataset.text;
+    ta.value = ta.value.trim() ? ta.value.trim().replace(/[.]?$/, ".") + " " + t.replace(/^The (primary|secondary) section was /, "It was ") : t;
+    dirty = true; updateDayState(); saveDraft(); return;
+  }
+  if (e.target.id === "sameAsRecv") {
+    $("hopper").value = $("recv").value; $("hopT").value = $("recvT").value;
+    dirty = true; updateDayState(); renderCalcs(); saveDraft(); toast("Hopper set to all received");
+  }
 });
+// keyboard "Next" moves to the next box; tapping a filled box selects its number
+const fieldOrder = () => [...$("entryForm").querySelectorAll("input, textarea")].filter(el => el.offsetParent !== null);
+$("entryForm").querySelectorAll("input").forEach(el => el.setAttribute("enterkeyhint", "next"));
+$("entryForm").addEventListener("keydown", e => {
+  if (e.key !== "Enter" || e.target.tagName !== "INPUT") return;
+  e.preventDefault();
+  const list = fieldOrder(), i = list.indexOf(e.target);
+  if (i >= 0 && list[i+1]) list[i+1].focus(); else e.target.blur();
+});
+$("entryForm").addEventListener("focusin", e => { if (e.target.tagName === "INPUT" && e.target.value) setTimeout(() => { try { e.target.select(); } catch(_){} }, 0); });
 $("settingsForm").addEventListener("submit", saveSettings);
 $("deleteDay").addEventListener("click", deleteDay);
 $("saveImg").addEventListener("click", saveImage);
