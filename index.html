@@ -196,6 +196,8 @@ nav.tabs button[aria-selected=true] svg{color:var(--accent)}
 .paper tr.tot td.t{color:var(--ink)}
 .paper tr.sub td{font-size:14px;color:var(--ink)}
 .paper tr.sub td.n{font-size:15px}
+.paper .note.hr{font-size:13.5px;color:#7A3A0B;background:#FFF6EE}
+.paper .note b{font-weight:800}
 .paper .note{font-size:12.5px;font-weight:600;color:#2F3A4A;padding:6px 8px;border-top:1px solid var(--line);line-height:1.4}
 .paper .rmk{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:8px}
 .paper .rmk div{background:#F8F5FC;border:1px solid #DDD3EC;border-radius:10px;padding:7px 9px;font-size:14.5px;font-weight:500;color:var(--ink);line-height:1.35}
@@ -273,7 +275,7 @@ input.nb:focus,#entryForm .inp input:focus{border-color:var(--focus);outline:non
 #entryForm .calc{padding:7px 10px;gap:3px;font-size:13px}
 #entryForm .calc .row.total{font-size:14px;padding-top:4px}
 #entryForm .calc .row .t{font-size:11px}
-#entryForm .field textarea{min-height:58px;font-size:15px;padding:8px 10px;border-radius:8px}
+#entryForm .field textarea{min-height:42px;resize:none;overflow:hidden;font-size:15px;padding:8px 10px;border-radius:8px}
 #entryForm .field label{font-size:12px}
 .chips.scroll{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:-2px -10px 0;padding:0 10px 2px}
 .chips.scroll::-webkit-scrollbar{display:none}
@@ -334,6 +336,8 @@ body{padding-bottom:calc(66px + env(safe-area-inset-bottom,0px))}
         <h2><span class="num">4</span>Running hours / km</h2>
         <div class="body">
           <div class="minis"><div class="mf"><label for="hPrimary">Primary</label><div class="inp"><input id="hPrimary" inputmode="decimal" enterkeyhint="next" placeholder="0"><span class="u">hrs</span></div></div><div class="mf"><label for="hSecondary">Secondary</label><div class="inp"><input id="hSecondary" inputmode="decimal" enterkeyhint="next" placeholder="0"><span class="u">hrs</span></div></div><div class="mf"><label for="hExc">Hyundai R230</label><div class="inp"><input id="hExc" inputmode="decimal" enterkeyhint="next" placeholder="0"><span class="u">hrs</span></div></div><div class="mf"><label for="hJcb">JCB 7813</label><div class="inp"><input id="hJcb" inputmode="decimal" enterkeyhint="next" placeholder="0"><span class="u">hrs</span></div></div><div class="mf"><label for="hCamper">Camper 6345</label><div class="inp"><input id="hCamper" inputmode="decimal" enterkeyhint="next" placeholder="0"><span class="u">km</span></div></div></div>
+          <div class="field"><label for="rHours">Remark (optional) – shown on the report</label><textarea id="rHours" rows="1" placeholder="e.g. JCB breakdown – not running"></textarea></div>
+          <div class="chips scroll"><button type="button" class="chip" data-remark="rHours" data-text="JCB UP92T7813 not working due to breakdown.">+ JCB breakdown</button><button type="button" class="chip" data-remark="rHours" data-text="Hyundai Excavator R230 not working due to breakdown.">+ Hyundai breakdown</button><button type="button" class="chip" data-remark="rHours" data-text="Hour meter not working, hours not recorded.">+ Meter fault</button><button type="button" class="chip" data-remark="rHours" data-text="Camper not used today.">+ Camper not used</button><button type="button" class="chip" data-remark="rHours" data-text="Machine under maintenance.">+ Maintenance</button></div>
           <div class="warnbox" id="calc4"></div>
           <button type="button" class="linkbtn" id="copyPrev" hidden></button>
         </div>
@@ -442,7 +446,7 @@ body{padding-bottom:calc(66px + env(safe-area-inset-bottom,0px))}
         <button type="submit" class="btn primary" id="saveSettings">Save settings</button>
       </div>
     </form>
-    <p class="small" style="text-align:center">App version 22 · 24-Oct-2026</p>
+    <p class="small" style="text-align:center">App version 23 · 25-Oct-2026</p>
     <div class="card"><h2>Delete this day</h2><div class="body">
       <p style="margin:0;font-size:13px;color:var(--muted)">Removes the entry for the date shown at the top. Stock and month totals recalculate.</p>
       <button class="btn danger" id="deleteDay">Delete entry for this date</button>
@@ -471,7 +475,7 @@ body{padding-bottom:calc(66px + env(safe-area-inset-bottom,0px))}
 const $ = id => document.getElementById(id);
 const MATERIALS = [["d10","t10","10 MM Aggregate"],["d20","t20","20 MM Aggregate"],["d30","t30","30 MM Aggregate"],["ms","tms","M-Sand"]];
 const NUM_FIELDS = ["recv","hopper","fromStock","d10","t10","d20","t20","d30","t30","ms","tms","hPrimary","hSecondary","hExc","hJcb","dCamper","dJcb","dExc","hCamper"];
-const TEXT_FIELDS = ["rPrimary","rSecondary"];
+const TEXT_FIELDS = ["rPrimary","rSecondary","rHours"];
 const OPT_FIELDS = ["recvT","hopT","fsT","phys"];
 const NOTE_SEED = {"2026-10-01": [15, 25.5], "2026-10-02": [20, 25.0], "2026-10-03": [20, 25.0], "2026-10-05": [20, 25.0], "2026-10-06": [20, 23.0], "2026-10-07": [20, 24.0], "2026-10-08": [20, 24.0], "2026-10-09": [20, 23.0], "2026-10-10": [20, 25.0], "2026-10-11": [20, 25.0], "2026-10-12": [20, 23.0], "2026-10-13": [20, 23.0], "2026-10-14": [20, 23.0], "2026-10-15": [20, 23.0], "2026-10-16": [24, 24.0], "2026-10-18": [20, 24.0]};
 const SEED = {"settings":{"startDate":"2026-10-01","openStock":355,"avg":20,"preparedBy":"Hemant Shukla","obRecvMT":0,"obRecvT":0,"obCumMT":67417.5,"obCumT":2864,"obAggMT":0,"obAggT":0,"obMsMT":0,"obMsT":0,"obDiesel":0},"days":{"2026-10-01":{"recv":464.82,"recvT":19,"hopper":364.82,"hopT":15,"fromStock":220,"fsT":11,"phys":null,"d10":43.61,"t10":2,"d20":233.25,"t20":8,"d30":116.15,"t30":4,"ms":156.0,"tms":5,"hPrimary":6.0,"hSecondary":7.0,"hExc":7.3,"hJcb":4.2,"dCamper":0,"dJcb":0,"dExc":294,"rPrimary":"The primary section was running very low due to boulder not available.","rSecondary":"The secondary section was not running during day shift due to pro wash plant wire mesh change, vibrator feeder motor 1no. installation and salary cleaning.","date":"2026-10-01"},"2026-10-02":{"recv":594.9,"recvT":24,"hopper":419.9,"hopT":17,"fromStock":0,"fsT":0,"phys":null,"d10":65.74,"t10":3,"d20":0,"t20":0,"d30":86.09,"t30":4,"ms":171.49,"tms":5,"hPrimary":4.0,"hSecondary":10.0,"hExc":6.3,"hJcb":3.5,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"The primary section was running as boulder available.","rSecondary":"The secondary section was not running well during both shift due to power cut and BC 2 V belt damaged.","date":"2026-10-02"},"2026-10-03":{"recv":894.26,"recvT":37,"hopper":894.26,"hopT":37,"fromStock":100,"fsT":5,"phys":null,"d10":60.71,"t10":3,"d20":105.44,"t20":4,"d30":251.33,"t30":10,"ms":375.42,"tms":14,"hPrimary":11.0,"hSecondary":12.0,"hExc":7.3,"hJcb":6.5,"dCamper":30,"dJcb":101,"dExc":200,"rPrimary":"The primary section was running as per boulder availability.","rSecondary":"The secondary section did not run properly during both shifts due to two power cuts during the day shift and HP Cone V-belt damage during the night shift.","date":"2026-10-03"},"2026-10-04":{"recv":1097.74,"recvT":48,"hopper":0,"hopT":null,"fromStock":0,"fsT":null,"phys":50,"d10":0,"t10":0,"d20":183.65,"t20":7,"d30":0,"t30":0,"ms":226.18,"tms":7,"hPrimary":0,"hSecondary":0,"hExc":0,"hJcb":0,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"ESTIMATE \u2013 04-10 report not received. Received boulder and dispatch back-calculated from 05-10 month totals.","rSecondary":"ESTIMATE \u2013 aggregate split by size unknown (all 183.650 MT / 7 trips put under 20 MM). Replace with the real 04-10 report.","date":"2026-10-04"},"2026-10-05":{"recv":161.58,"recvT":7,"hopper":111.58,"hopT":5,"fromStock":0,"fsT":0,"phys":null,"d10":21.94,"t10":1,"d20":70.81,"t20":3,"d30":180.41,"t30":8,"ms":438.33,"tms":14,"hPrimary":1.0,"hSecondary":14.0,"hExc":8.3,"hJcb":5.1,"dCamper":26,"dJcb":101,"dExc":178,"rPrimary":"The primary section was not running well during both shift due to boulder availability.","rSecondary":"The secondary section was running well during both shift. BC-6 return belt damaged in day shift.","date":"2026-10-05"},"2026-10-06":{"recv":1025.1,"recvT":45,"hopper":542.1,"hopT":24,"fromStock":0,"fsT":0,"phys":642,"d10":122.46,"t10":5,"d20":85.66,"t20":3,"d30":105.2,"t30":4,"ms":322.54,"tms":9,"hPrimary":6.0,"hSecondary":13.0,"hExc":9.0,"hJcb":3.3,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"The primary section was running low during both shifts due to boulder not being available, and the BC-2 belt was damaged.","rSecondary":"The secondary section was running well during both shifts. During the night shift, it stopped early due to no material in the tunnel.","date":"2026-10-06"},"2026-10-07":{"recv":618.14,"recvT":26,"hopper":570.14,"hopT":22,"fromStock":0,"fsT":0,"phys":null,"d10":61.24,"t10":3,"d20":185.07,"t20":7,"d30":141.26,"t30":5,"ms":306.84,"tms":10,"hPrimary":5.5,"hSecondary":0,"hExc":7.7,"hJcb":2.7,"dCamper":0,"dJcb":0,"dExc":254,"rPrimary":"The primary section was running low during both shift due to boulder not available, and jaw plate change.","rSecondary":"The secondary section was not running well during both shift due to Tunnel material nil. (Secondary hours N.A. \u2013 meter fault.)","date":"2026-10-07"},"2026-10-08":{"recv":1123.35,"recvT":47,"hopper":1075.35,"hopT":45,"fromStock":0,"fsT":0,"phys":null,"d10":0,"t10":0,"d20":173.01,"t20":7,"d30":206.8,"t30":9,"ms":187.15,"tms":6,"hPrimary":11.0,"hSecondary":16.0,"hExc":5.6,"hJcb":2.6,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"The primary section was running well during both shifts as boulder was available.","rSecondary":"The secondary section was running well during both shifts.","date":"2026-10-08"},"2026-10-09":{"recv":618.15,"recvT":27,"hopper":526.15,"hopT":23,"fromStock":80,"fsT":4,"phys":null,"d10":19.74,"t10":1,"d20":147.14,"t20":6,"d30":104.23,"t30":3,"ms":406.05,"tms":12,"hPrimary":6.0,"hSecondary":8.0,"hExc":8.2,"hJcb":1.8,"dCamper":42,"dJcb":0,"dExc":164,"rPrimary":"The primary section was running low due to boulder not being available during the night shift.","rSecondary":"The secondary section was not running during the day shift because the pro-wash plant water-source motor was damaged. It ran well only during the night shift.","date":"2026-10-09"},"2026-10-10":{"recv":219.31,"recvT":9,"hopper":194.31,"hopT":8,"fromStock":380,"fsT":19,"phys":null,"d10":106.99,"t10":4,"d20":0,"t20":0,"d30":290.23,"t30":10,"ms":286.45,"tms":9,"hPrimary":11.0,"hSecondary":12.0,"hExc":9.5,"hJcb":1.2,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"The primary section was running low due to boulder not available from mine's, only running from stock boulder during both shift.","rSecondary":"The secondary section was running well during both shift after maintenance.","date":"2026-10-10"},"2026-10-11":{"recv":639.72,"recvT":26,"hopper":489.72,"hopT":20,"fromStock":220,"fsT":11,"phys":null,"d10":47.18,"t10":2,"d20":265.69,"t20":11,"d30":179.63,"t30":6,"ms":135.33,"tms":5,"hPrimary":7.5,"hSecondary":6.0,"hExc":6.1,"hJcb":2.1,"dCamper":0,"dJcb":60,"dExc":246,"rPrimary":"The primary section was running low due to boulder not available from mine's properly during both shift. Running from stock boulder too.","rSecondary":"The secondary section was running very low during both shift due to boulder not available on Tunnel feeder.","date":"2026-10-11"},"2026-10-12":{"recv":714.04,"recvT":31,"hopper":645.04,"hopT":28,"fromStock":100,"fsT":5,"phys":null,"d10":0,"t10":0,"d20":180.3,"t20":6,"d30":119.82,"t30":3,"ms":525.67,"tms":20,"hPrimary":7.0,"hSecondary":11.0,"hExc":4.5,"hJcb":2.6,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"The primary section was running low due to boulder not available from mine properly during both shifts. Running from stock boulder too. BC 1 jammed issue after maintenance.","rSecondary":"The secondary section was running very low during day shift due to boulder not available on Tunnel feeder. Running well during night shift.","date":"2026-10-12"},"2026-10-13":{"recv":1128.43,"recvT":49,"hopper":1013.43,"hopT":44,"fromStock":20,"fsT":1,"phys":null,"d10":48.53,"t10":2,"d20":207.0,"t20":7,"d30":198.09,"t30":6,"ms":206.78,"tms":8,"hPrimary":10.0,"hSecondary":10.0,"hExc":1.9,"hJcb":1.1,"dCamper":46,"dJcb":0,"dExc":58,"rPrimary":"The primary section was running well during both shifts as boulder was available. Running from stock boulder too. BC 1 jammed issue after maintenance.","rSecondary":"The secondary section was running low during day shift due to boulder not being available on the Tunnel feeder. Running well during night shift. (Hyundai & JCB running very low due to breakdown.)","date":"2026-10-13"},"2026-10-14":{"recv":0,"recvT":0,"hopper":0,"hopT":0,"fromStock":440,"fsT":22,"phys":50,"d10":69.86,"t10":3,"d20":409.44,"t20":17,"d30":75.5,"t30":2,"ms":432.0,"tms":14,"hPrimary":5.0,"hSecondary":12.0,"hExc":8.8,"hJcb":1.9,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"The primary section was running from stock boulder only because boulder was not available from the mines.","rSecondary":"The secondary section was running well during day shift. Night shift was not running well due to no material in the tunnel feeder. (JCB running very low due to breakdown.)","date":"2026-10-14"},"2026-10-15":{"recv":42.91,"recvT":2,"hopper":0,"hopT":0,"fromStock":300,"fsT":15,"phys":62,"d10":71.37,"t10":3,"d20":85.86,"t20":3,"d30":359.45,"t30":13,"ms":232.44,"tms":9,"hPrimary":0.0,"hSecondary":6.5,"hExc":7.1,"hJcb":3.2,"dCamper":31,"dJcb":107,"dExc":300,"rPrimary":"The primary section was running from stock boulder only because boulder was not available from the mines.","rSecondary":"The secondary section was running only during night shift. Day shift was not running due to no material in the tunnel feeder.","date":"2026-10-15"},"2026-10-16":{"recv":362.42,"recvT":15,"hopper":314.42,"hopT":13,"fromStock":60,"fsT":3,"phys":null,"d10":64.27,"t10":3,"d20":73.34,"t20":2,"d30":0,"t30":0,"ms":152.77,"tms":5,"hPrimary":3.5,"hSecondary":1.0,"hExc":3.1,"hJcb":4.4,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"The primary section was running very low due to boulder not available from mine's.","rSecondary":"Secondary plant was not running during day shift due to material not available on Tunnel feeder, and night shift was not running due to pro-wash plant returning pipe jammed.","date":"2026-10-16"},"2026-10-17":{"recv":0,"recvT":0,"hopper":0,"hopT":0,"fromStock":0,"fsT":0,"phys":null,"d10":0,"t10":0,"d20":0,"t20":0,"d30":128.1,"t30":5,"ms":22.16,"tms":1,"hPrimary":0.0,"hSecondary":0.0,"hExc":3.6,"hJcb":0.8,"dCamper":0,"dJcb":0,"dExc":0,"rPrimary":"The primary section was not running during both shifts due to boulder not available from mine's. Stock boulder nil also.","rSecondary":"Secondary plant was not running during both shifts due to HP cone mantle change operational work.","date":"2026-10-17"},"2026-10-18":{"recv":68.25,"recvT":3,"hopper":68.25,"hopT":3,"fromStock":0,"fsT":0,"phys":null,"d10":0,"t10":0,"d20":0,"t20":0,"d30":73.54,"t30":3,"ms":80.86,"tms":2,"hPrimary":1.0,"hSecondary":5.0,"hExc":4.3,"hJcb":0.0,"dCamper":47,"dJcb":0,"dExc":167,"rPrimary":"The primary section was running very low due to boulder not available from mine's.","rSecondary":"Secondary plant was running very low during both shift due to boulder not available on tunnel feeder and mantle change. (JCB closed.)","date":"2026-10-18"}}};
@@ -547,7 +551,7 @@ function recompute(){
     mAgg += c.agg; mAggT += c.aggT; mMs += c.ms; mMsT += c.tms;
     Object.assign(c,{mAgg, mAggT, mMs, mMsT, mAll:mAgg+mMs, mAllT:mAggT+mMsT});
     c.hPrimary=num(d.hPrimary); c.hSecondary=num(d.hSecondary); c.hExc=num(d.hExc); c.hJcb=num(d.hJcb); c.hCamper=num(d.hCamper);
-    c.rPrimary=d.rPrimary||""; c.rSecondary=d.rSecondary||"";
+    c.rPrimary=d.rPrimary||""; c.rSecondary=d.rSecondary||""; c.rHours=d.rHours||"";
     c.dCamper=num(d.dCamper); c.dJcb=num(d.dJcb); c.dExc=num(d.dExc); c.dsl=c.dCamper+c.dJcb+c.dExc;
     mDsl += c.dsl; c.mDsl = mDsl;
     calc[id] = c; prevClose = close;
@@ -583,8 +587,11 @@ function fillForm(d){
   for (const f of TEXT_FIELDS) $(f).value = d ? (d[f]||"") : "";
   let anyOpt = false;
   for (const f of OPT_FIELDS){ if (!$(f)) continue; const v = d ? d[f] : null; $(f).value = (v===null||v===undefined||v==="") ? "" : v; }
-  dirty = false; updateDayState(); renderCalcs();
+  dirty = false; updateDayState(); renderCalcs(); growAll();
 }
+/* remark boxes grow to fit their text */
+function grow(ta){ if (!ta || ta.tagName !== "TEXTAREA") return; ta.style.height = "auto"; if (ta.scrollHeight) ta.style.height = (ta.scrollHeight + 3) + "px"; }
+function growAll(){ for (const f of TEXT_FIELDS) grow($(f)); }
 function draftKey(id){ return "plantlog-draft-"+id; }
 function saveDraft(){ try{ localStorage.setItem(draftKey(selected), JSON.stringify({at:new Date().toISOString(), form:readForm()})); }catch(e){} }
 // A draft is only kept while it holds real unsaved typing: it is dropped when it matches the saved day,
@@ -712,7 +719,7 @@ function reportHTML(id){
     ${tr("Secondary Section", f1(c.hSecondary) + " <small>Hrs.</small>")}
     ${tr("Hyundai Excavator R230", f1(c.hExc) + " <small>Hrs.</small>")}
     ${tr("JCB UP92T7813", f1(c.hJcb) + " <small>Hrs.</small>")}
-    ${tr("Camper MP07ZM6345", km(c.hCamper) + " <small>km</small>")}</table></div>`;
+    ${tr("Camper MP07ZM6345", km(c.hCamper) + " <small>km</small>")}</table>${c.rHours ? `<div class="note hr"><b>Remark:</b> ${esc(c.rHours)}</div>` : ""}</div>`;
   const b2 = `<div class="sec k2">${H("truck","2. Today's dispatch","#C4261D")}<table>
     <tr><th>Material</th><th>MT</th><th>Trips</th></tr>
     ${MATERIALS.map(([m,t,l]) => tr(l.replace(" Aggregate",""), nil3(c[m]), nil2(c[t]))).join("")}
@@ -746,7 +753,7 @@ function whatsappText(id){
   L.push(`*2. Dispatch today*`, ...MATERIALS.map(([m,t,l])=>`${l}: ${nil3(c[m])} MT (${nil2(c[t])})`),
     `Total aggregate: ${nil3(c.agg)} MT (${nil2(c.aggT)})`, `Total all material: ${nil3(c.all)} MT (${nil2(c.allT)})`, ``);
   L.push(`*3. This month*`, `Aggregate: ${f3(c.mAgg)} MT (${c.mAggT})`, `M-Sand: ${f3(c.mMs)} MT (${c.mMsT})`, `All material: ${f3(c.mAll)} MT (${c.mAllT})`, ``);
-  L.push(`*4. Plant and equipment's running hours/km*`, `Primary ${f1(c.hPrimary)} hrs · Secondary ${f1(c.hSecondary)} hrs · Hyundai R230 ${f1(c.hExc)} hrs · JCB ${f1(c.hJcb)} hrs · Camper ${km(c.hCamper)} km`, ``);
+  L.push(`*4. Plant and equipment's running hours/km*`, `Primary ${f1(c.hPrimary)} hrs · Secondary ${f1(c.hSecondary)} hrs · Hyundai R230 ${f1(c.hExc)} hrs · JCB ${f1(c.hJcb)} hrs · Camper ${km(c.hCamper)} km`, c.rHours ? `Remark: ${c.rHours}` : "", ``);
   L.push(`*5. Diesel*`, `Today: ${c.dsl?fmtInt(c.dsl)+" Ltr":"NIL"}`, `This month: ${fmtInt(c.mDsl)} Litres`);
   if (c.rPrimary || c.rSecondary) L.push(``, `*6. Remarks*`, c.rPrimary?`Primary: ${c.rPrimary}`:"", c.rSecondary?`Secondary: ${c.rSecondary}`:"");
   if (settings.preparedBy) L.push(``, `Prepared by: ${settings.preparedBy}`);
@@ -904,7 +911,7 @@ function setTab(t){
   document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.tab===t)));
   for (const s of ["entry","report","charts","data"]) $("tab-"+s).hidden = s!==t;
   try{ history.replaceState(null,"","#"+t); }catch(e){}
-  renderAll(true); if (t === "data") fillShareDates(); window.scrollTo(0,0);
+  renderAll(true); if (t === "data") fillShareDates(); if (t === "entry") growAll(); window.scrollTo(0,0);
 }
 function setDate(id){
   if (!id) return;
@@ -1163,7 +1170,7 @@ async function buildTrackerXlsx(){
     if (d.phys !== null && d.phys !== undefined && d.phys !== "") put("Daily Boulder","H"+r, num(d.phys));
     [["B","d10"],["C","t10"],["D","d20"],["E","t20"],["F","d30"],["G","t30"],["H","ms"],["I","tms"]].forEach(([c,k]) => put("Daily Dispatch", c+r, n0(d[k])));
     [["B","hPrimary"],["C","hSecondary"],["D","hExc"],["E","hJcb"],["H","hCamper"]].forEach(([c,k]) => put("Hours & Remarks", c+r, n0(d[k])));
-    put("Hours & Remarks","F"+r, d.rPrimary || ""); put("Hours & Remarks","G"+r, d.rSecondary || "");
+    put("Hours & Remarks","F"+r, d.rPrimary || ""); put("Hours & Remarks","G"+r, d.rSecondary || ""); put("Hours & Remarks","I"+r, d.rHours || "");
     [["B","dCamper"],["C","dJcb"],["D","dExc"]].forEach(([c,k]) => put("Diesel", c+r, n0(d[k])));
   });
   for (const [k, row] of Object.entries(TRACKER_SETTINGS)) {
@@ -1243,7 +1250,7 @@ async function buildShareXlsx(from, to){
     D("B", c.d10); D("C", c.t10); D("D", c.d20); D("E", c.t20); D("F", c.d30); D("G", c.t30); D("H", c.ms); D("I", c.tms);
     D("J", c.agg); D("K", c.aggT); D("L", c.all); D("M", c.allT); D("N", c.mAgg); D("O", c.mAggT); D("P", c.mMs); D("Q", c.mMsT); D("R", c.mAll); D("S", c.mAllT);
     [["B","hPrimary"],["C","hSecondary"],["D","hExc"],["E","hJcb"],["H","hCamper"]].forEach(([col,k]) => put("Hours & Remarks", col+r, r6(c[k])));
-    put("Hours & Remarks", "F"+r, c.rPrimary); put("Hours & Remarks", "G"+r, c.rSecondary);
+    put("Hours & Remarks", "F"+r, c.rPrimary); put("Hours & Remarks", "G"+r, c.rSecondary); put("Hours & Remarks", "I"+r, c.rHours);
     [["B","dCamper"],["C","dJcb"],["D","dExc"],["E","dsl"],["F","mDsl"]].forEach(([col,k]) => put("Diesel", col+r, r6(c[k])));
   });
   const lastId = ids[ids.length-1], repSer = excelSerial(lastId), repRow = T_FIRST + ids.length - 1, rc = calc[lastId];
@@ -1357,7 +1364,7 @@ async function readBackup(file){
     if (wb.Sheets["Daily Boulder"] && wb.Sheets["Daily Dispatch"]) {
       const rowsOf = name => wb.Sheets[name] ? XLSX.utils.sheet_to_json(wb.Sheets[name], {header:1, raw:true, defval:null, range:T_FIRST-1}) : [];
       const cell = (name, ref) => { const s_ = wb.Sheets[name]; return s_ && s_[ref] ? s_[ref].v : null; };
-      const next = {}, blank = id => (next[id] = next[id] || {date:id, recvT:null, hopT:null, fsT:null, phys:null, rPrimary:"", rSecondary:""});
+      const next = {}, blank = id => (next[id] = next[id] || {date:id, recvT:null, hopT:null, fsT:null, phys:null, rPrimary:"", rSecondary:"", rHours:""});
       const nn = v => (v === null || v === "") ? null : num(v);
       for (const r of rowsOf("Daily Boulder")) { const id = toIso(r[0]); if (!id) continue; const o = blank(id);
         o.recv = num(r[1]); o.recvT = nn(r[2]); o.hopper = num(r[3]); o.hopT = nn(r[4]); o.fromStock = num(r[5]); o.fsT = nn(r[6]); o.phys = nn(r[7]); }
@@ -1365,7 +1372,7 @@ async function readBackup(file){
         ["d10","t10","d20","t20","d30","t30","ms","tms"].forEach((k, j) => o[k] = num(r[j+1])); }
       for (const r of rowsOf("Hours & Remarks")) { const id = toIso(r[0]); if (!id) continue; const o = blank(id);
         o.hPrimary = num(r[1]); o.hSecondary = num(r[2]); o.hExc = num(r[3]); o.hJcb = num(r[4]);
-        o.rPrimary = r[5] ? String(r[5]) : ""; o.rSecondary = r[6] ? String(r[6]) : ""; o.hCamper = num(r[7]); }
+        o.rPrimary = r[5] ? String(r[5]) : ""; o.rSecondary = r[6] ? String(r[6]) : ""; o.hCamper = num(r[7]); o.rHours = r[8] ? String(r[8]) : ""; }
       for (const r of rowsOf("Diesel")) { const id = toIso(r[0]); if (!id) continue; const o = blank(id);
         o.dCamper = num(r[1]); o.dJcb = num(r[2]); o.dExc = num(r[3]); }
       for (const o of Object.values(next)) for (const f of NUM_FIELDS) if (o[f] === undefined) o[f] = 0;
@@ -1433,7 +1440,7 @@ function sanitize(e){
   if (c !== el.value) el.value = c;
 }
 $("settingsForm").addEventListener("input", sanitize);
-$("entryForm").addEventListener("input", (e) => { sanitize(e); dirty = true; updateDayState(); renderCalcs(); saveDraft(); });
+$("entryForm").addEventListener("input", (e) => { sanitize(e); grow(e.target); dirty = true; updateDayState(); renderCalcs(); saveDraft(); });
 $("discardBtn").addEventListener("click", () => { clearDraft(selected); dirty = false; fillForm(days[selected] || null); toast("Changes discarded"); });
 $("nextGo").addEventListener("click", () => { const n = nextToEnter(); if (n) setDate(n); });
 $("copyPrev").addEventListener("click", () => {
@@ -1441,7 +1448,7 @@ $("copyPrev").addEventListener("click", () => {
   const d = days[prev];
   for (const f of ["hPrimary","hSecondary","hExc","hJcb"]) $(f).value = d[f] ? d[f] : "";
   for (const f of TEXT_FIELDS) $(f).value = d[f] || "";
-  dirty = true; updateDayState(); renderCalcs(); saveDraft(); toast("Copied hours & remarks from " + dmy(prev));
+  growAll(); dirty = true; updateDayState(); renderCalcs(); saveDraft(); toast("Copied hours & remarks from " + dmy(prev));
 });
 $("copyMonth").addEventListener("click", async () => {
   const t = monthText(); if (!t) return;
@@ -1461,7 +1468,7 @@ $("entryForm").addEventListener("click", e => {
   if (r) {
     const ta = $(r.dataset.remark), t = r.dataset.text;
     ta.value = ta.value.trim() ? ta.value.trim().replace(/[.]?$/, ".") + " " + t.replace(/^The (primary|secondary) section was /, "It was ") : t;
-    dirty = true; updateDayState(); saveDraft(); return;
+    grow(ta); dirty = true; updateDayState(); saveDraft(); return;
   }
   if (e.target.id === "sameAsRecv") {
     $("hopper").value = $("recv").value; $("hopT").value = $("recvT").value;
