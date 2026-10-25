@@ -446,7 +446,7 @@ body{padding-bottom:calc(66px + env(safe-area-inset-bottom,0px))}
         <button type="submit" class="btn primary" id="saveSettings">Save settings</button>
       </div>
     </form>
-    <p class="small" style="text-align:center">App version 23 · 25-Oct-2026</p>
+    <p class="small" style="text-align:center">App version 24 · 25-Oct-2026</p>
     <div class="card"><h2>Delete this day</h2><div class="body">
       <p style="margin:0;font-size:13px;color:var(--muted)">Removes the entry for the date shown at the top. Stock and month totals recalculate.</p>
       <button class="btn danger" id="deleteDay">Delete entry for this date</button>
@@ -705,7 +705,7 @@ function reportHTML(id){
     <tr><th>Today</th><th>MT</th><th>Trips</th></tr>
     ${tr("Received at crusher", f3(c.recv), p2(c.recvT))}
     ${tr("Direct to hopper", f3(c.hopper), p2(c.hopperT))}
-    ${tr("To stock (approx.)", f3(c.toStock), p2(c.toStockT))}
+    ${tr("To stock", f3(c.toStock), p2(c.toStockT))}
     ${tr("Crushed from stock", f3(c.fs), p2(c.fsT))}</table><table>
     <tr><th>Totals</th><th>MT</th><th>Trips</th></tr>
     ${tr("Total crushing today", f3(c.crush), p2(c.crushT), "tot")}
